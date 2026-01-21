@@ -14,7 +14,7 @@ UserSettings/
 *.csproj
 *.sln
 .vsconfig
-.htm
+UpgradeLog*.htm
 
 # OS
 .DS_Store
