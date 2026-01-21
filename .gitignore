@@ -13,7 +13,6 @@ UserSettings/
 .idea/
 *.csproj
 *.sln
-.gitignore
 .vsconfig
 .htm
 
