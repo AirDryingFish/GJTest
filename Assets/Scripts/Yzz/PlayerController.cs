@@ -65,6 +65,11 @@ namespace Yzz
         /// <summary> 每次着地只允许起跳一次，防止接地判定连续为 true 时重复加跳跃力 </summary>
         private bool _hasJumpedSinceGrounded = true;
 
+        /// <summary> Model 层 / 动画层可读：当前速度 </summary>
+        public Vector2 Velocity => _rb != null ? _rb.velocity : Vector2.zero;
+        /// <summary> Model 层 / 动画层可读：是否在地面 </summary>
+        public bool IsGroundedState => IsGrounded();
+
         private void Awake()
         {
             _rb = GetComponent<Rigidbody2D>();
