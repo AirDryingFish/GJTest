@@ -2589,7 +2589,7 @@ MonoBehaviour:
   jumpBufferTime: 0.12
   respawnY: -10
   mask: {fileID: 0}
-  spriteRenderer: {fileID: 0}
+  spriteRenderer: {fileID: 1063047205}
 --- !u!50 &1688843566
 Rigidbody2D:
   serializedVersion: 4
