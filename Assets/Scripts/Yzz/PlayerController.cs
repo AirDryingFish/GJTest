@@ -51,6 +51,10 @@ namespace Yzz
         [Tooltip("The Mask Object to detect")]
         [SerializeField] private DraggableMask mask;
 
+        [Header("Sprite")]
+        [Tooltip("不指定则用同物体上的 SpriteRenderer；向左走时 flipX = true")]
+        [SerializeField] private SpriteRenderer spriteRenderer;
+
         private Rigidbody2D _rb;
         private Collider2D _col;
         private Vector2 _spawnPosition;
@@ -75,6 +79,8 @@ namespace Yzz
             {
                 Debug.LogError("Mask object is null");
             }
+            if (spriteRenderer == null)
+                spriteRenderer = GetComponent<SpriteRenderer>();
         }
 
         private void Update()
@@ -98,6 +104,13 @@ namespace Yzz
             }
             else if (_coyoteCounter > 0f)
                 _coyoteCounter -= Time.deltaTime;
+
+            // 朝左走时 flipX，朝右走时不 flip
+            if (spriteRenderer != null)
+            {
+                if (_inputX < 0f) spriteRenderer.flipX = true;
+                else if (_inputX > 0f) spriteRenderer.flipX = false;
+            }
         }
 
         private void FixedUpdate()
