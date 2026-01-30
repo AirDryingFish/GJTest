@@ -27,6 +27,12 @@ namespace Yzz
         [SerializeField] private float groundCheckRadius = 0.1f;
         [SerializeField] private Vector2 groundCheckOffset = new Vector2(0f, -0.1f);
 
+        [Header("Sprint")]
+        [Tooltip("移动速度的乘数，按住 Shift 时生效")]
+        [SerializeField] private float sprintMultiplier = 1.5f;
+        [Tooltip("按住 Shift 时的加速度乘数（地面/空中加速度都会乘以它）")]
+        [SerializeField] private float sprintAccelerationMultiplier = 1.15f;
+
         [Header("Feel (Coyote & Buffer)")]
         [SerializeField] private float coyoteTime = 0.12f;
         [SerializeField] private float jumpBufferTime = 0.12f;
@@ -36,6 +42,7 @@ namespace Yzz
         private float _coyoteCounter;
         private float _jumpBufferCounter;
         private float _inputX;
+        private bool _isSprinting;
         /// <summary> 每次着地只允许起跳一次，防止接地判定连续为 true 时重复加跳跃力 </summary>
         private bool _hasJumpedSinceGrounded = true;
 
@@ -51,6 +58,9 @@ namespace Yzz
         private void Update()
         {
             _inputX = Input.GetAxisRaw("Horizontal");
+
+            // Sprint: 按住 Shift 加速
+            _isSprinting = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
 
             // Jump buffer: remember jump input for a short time
             if (Input.GetKeyDown(KeyCode.Space))
@@ -73,8 +83,10 @@ namespace Yzz
             bool grounded = IsGrounded();
 
             // Horizontal: 地面用大加速度跟手，空中略弱
-            float targetVelX = _inputX * moveSpeed;
-            float accel = grounded ? groundAcceleration : (groundAcceleration * airControlFactor);
+            float currentMoveSpeed = moveSpeed * (_isSprinting ? sprintMultiplier : 1f);
+            float targetVelX = _inputX * currentMoveSpeed;
+            float baseAccel = grounded ? groundAcceleration : (groundAcceleration * airControlFactor);
+            float accel = baseAccel * (_isSprinting ? sprintAccelerationMultiplier : 1f);
             float newVelX = Mathf.MoveTowards(_rb.velocity.x, targetVelX, accel * Time.fixedDeltaTime);
             _rb.velocity = new Vector2(newVelX, _rb.velocity.y);
 
