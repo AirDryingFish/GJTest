@@ -42,7 +42,7 @@ namespace Yzz
         private float _leadVelY;
         private int _lastMoveDirX; // 上一帧水平方向：-1/0/1，用于检测突然反向
 
-        private void Start()
+         private void Start()
         {
             _cam = GetComponent<Camera>();
             if (target == null && !string.IsNullOrEmpty(targetTag))

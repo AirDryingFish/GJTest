@@ -24,8 +24,20 @@ namespace Yzz
 
         [Header("Ground Check")]
         [SerializeField] private LayerMask groundLayer;
-        [SerializeField] private float groundCheckRadius = 0.1f;
-        [SerializeField] private Vector2 groundCheckOffset = new Vector2(0f, -0.1f);
+        [Tooltip("脚下射线检测长度，只检测正下方的地面")]
+        [SerializeField] private float groundCheckDistance = 0.2f;
+        [SerializeField] private Vector2 groundCheckOffset = new Vector2(0f, -0.05f);
+        [Tooltip("表面法线 Y 至少为此值才算“踩在地面”（避免贴墙时把墙当地面）")]
+        [Range(0.3f, 1f)]
+        [SerializeField] private float minGroundNormalY = 0.5f;
+        [Tooltip("侧面射线长度，用于检测贴墙；空中贴墙时不往墙里推，避免卡住不下落")]
+        [SerializeField] private float wallCheckDistance = 0.08f;
+
+        [Header("Sprint")]
+        [Tooltip("移动速度的乘数，按住 Shift 时生效")]
+        [SerializeField] private float sprintMultiplier = 1.5f;
+        [Tooltip("按住 Shift 时的加速度乘数（地面/空中加速度都会乘以它）")]
+        [SerializeField] private float sprintAccelerationMultiplier = 1.15f;
 
         [Header("Feel (Coyote & Buffer)")]
         [SerializeField] private float coyoteTime = 0.12f;
@@ -36,6 +48,7 @@ namespace Yzz
         private float _coyoteCounter;
         private float _jumpBufferCounter;
         private float _inputX;
+        private bool _isSprinting;
         /// <summary> 每次着地只允许起跳一次，防止接地判定连续为 true 时重复加跳跃力 </summary>
         private bool _hasJumpedSinceGrounded = true;
 
@@ -51,6 +64,9 @@ namespace Yzz
         private void Update()
         {
             _inputX = Input.GetAxisRaw("Horizontal");
+
+            // Sprint: 按住 Shift 加速
+            _isSprinting = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
 
             // Jump buffer: remember jump input for a short time
             if (Input.GetKeyDown(KeyCode.Space))
@@ -71,10 +87,20 @@ namespace Yzz
         private void FixedUpdate()
         {
             bool grounded = IsGrounded();
+            bool wallLeft = CheckWall(-1);
+            bool wallRight = CheckWall(1);
 
-            // Horizontal: 地面用大加速度跟手，空中略弱
-            float targetVelX = _inputX * moveSpeed;
-            float accel = grounded ? groundAcceleration : (groundAcceleration * airControlFactor);
+            // 空中贴墙时不再往墙里推，否则物理会把角色顶住/顶起，松键才下落
+            float currentMoveSpeed = moveSpeed * (_isSprinting ? sprintMultiplier : 1f);
+            float targetVelX = _inputX * currentMoveSpeed;
+            if (!grounded)
+            {
+                if (_inputX > 0f && wallRight) targetVelX = 0f;
+                if (_inputX < 0f && wallLeft) targetVelX = 0f;
+            }
+
+            float baseAccel = grounded ? groundAcceleration : (groundAcceleration * airControlFactor);
+            float accel = baseAccel * (_isSprinting ? sprintAccelerationMultiplier : 1f);
             float newVelX = Mathf.MoveTowards(_rb.velocity.x, targetVelX, accel * Time.fixedDeltaTime);
             _rb.velocity = new Vector2(newVelX, _rb.velocity.y);
 
@@ -99,18 +125,33 @@ namespace Yzz
 
         private bool IsGrounded()
         {
-            Vector2 center = (Vector2)transform.position + groundCheckOffset;
-            Collider2D hit = Physics2D.OverlapCircle(center, groundCheckRadius, groundLayer);
-            // 排除自身碰撞体：若 groundLayer 包含玩家层或选成 Everything，会一直“踩着自己”导致每帧加跳跃力，角色被顶飞
-            if (hit == null) return false;
-            if (_col != null && hit == _col) return false;
+            Vector2 origin = (Vector2)transform.position + groundCheckOffset;
+            RaycastHit2D hit = Physics2D.Raycast(origin, Vector2.down, groundCheckDistance, groundLayer);
+            if (!hit) return false;
+            if (_col != null && hit.collider == _col) return false;
+            // 只算“脚下方、表面朝上”的地面，贴墙时墙的法线是水平的，不会判成地面，避免卡墙不下落
+            if (hit.normal.y < minGroundNormalY) return false;
+            return true;
+        }
+
+        /// <summary> 检测左侧(-1)或右侧(1)是否有墙/障碍，用于空中贴墙时不往墙里推 </summary>
+        private bool CheckWall(int direction)
+        {
+            if (_col == null) return false;
+            float extX = _col.bounds.extents.x;
+            Vector2 origin = (Vector2)transform.position + new Vector2(direction * extX, 0f);
+            Vector2 dir = new Vector2(direction, 0f);
+            RaycastHit2D hit = Physics2D.Raycast(origin, dir, wallCheckDistance, groundLayer);
+            if (!hit) return false;
+            if (hit.collider == _col) return false;
             return true;
         }
 
         private void OnDrawGizmosSelected()
         {
+            Vector2 origin = (Vector2)transform.position + groundCheckOffset;
             Gizmos.color = IsGrounded() ? Color.green : Color.red;
-            Gizmos.DrawWireSphere((Vector2)transform.position + groundCheckOffset, groundCheckRadius);
+            Gizmos.DrawLine(origin, origin + Vector2.down * groundCheckDistance);
         }
     }
 }
