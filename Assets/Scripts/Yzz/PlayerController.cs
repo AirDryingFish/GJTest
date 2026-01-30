@@ -43,8 +43,13 @@ namespace Yzz
         [SerializeField] private float coyoteTime = 0.12f;
         [SerializeField] private float jumpBufferTime = 0.12f;
 
+        [Header("Respawn")]
+        [Tooltip("当角色的 Y 坐标低于此值时，会被传回初始出生点")]
+        [SerializeField] private float respawnY = -100f;
+
         private Rigidbody2D _rb;
         private Collider2D _col;
+        private Vector2 _spawnPosition;
         private float _coyoteCounter;
         private float _jumpBufferCounter;
         private float _inputX;
@@ -56,6 +61,8 @@ namespace Yzz
         {
             _rb = GetComponent<Rigidbody2D>();
             _col = GetComponent<Collider2D>();
+            // 保存初始出生点，跌落重生时回到此位置
+            _spawnPosition = transform.position;
             _rb.gravityScale = gravityScale;
             _rb.interpolation = RigidbodyInterpolation2D.Interpolate;
             _rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
@@ -86,6 +93,17 @@ namespace Yzz
 
         private void FixedUpdate()
         {
+            // 跌落重生：低于阈值则传回初始位置并重置速度/计时
+            if (transform.position.y < respawnY)
+            {
+                _rb.velocity = Vector2.zero;
+                transform.position = _spawnPosition;
+                _coyoteCounter = coyoteTime;
+                _jumpBufferCounter = 0f;
+                _hasJumpedSinceGrounded = false;
+                return;
+            }
+
             bool grounded = IsGrounded();
             bool wallLeft = CheckWall(-1);
             bool wallRight = CheckWall(1);
