@@ -37,7 +37,7 @@ namespace Yzz
         {
             if (pointA != null && pointB != null && speed > 0f)
             {
-                float dist = Vector3.Distance(pointA.position, pointB.position);
+                float dist = Vector3.Distance(new Vector3(pointA.position.x, transform.position.y, transform.position.z), new Vector3(pointB.position.x, transform.position.y, transform.position.z));
                 _duration = dist / speed;
             }
             else
@@ -56,7 +56,7 @@ namespace Yzz
             if (_t <= 0f) { _t = 0f; _direction = 1f; }
 
             float s = linear ? _t : Mathf.SmoothStep(0f, 1f, _t);
-            Vector3 pos = Vector3.Lerp(pointA.position, pointB.position, s);
+            Vector3 pos = Vector3.Lerp(new Vector3(pointA.position.x, transform.position.y, transform.position.z), new Vector3(pointB.position.x, transform.position.y, transform.position.z), s);
             pos.z = transform.position.z;
             transform.position = pos;
         }
