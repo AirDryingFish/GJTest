@@ -54,6 +54,10 @@ namespace Yzz
         [Tooltip("The Mask Object to detect")]
         [SerializeField] private DraggableMask mask;
 
+        [Header("Sprite")]
+        [Tooltip("不指定则用同物体上的 SpriteRenderer；向左走时 flipX = true")]
+        [SerializeField] private SpriteRenderer[] spriteRenderers;
+
         // private Rigidbody2D _rb;
         // private Collider2D _col;
         private Rigidbody2D[] _rbs;
@@ -82,6 +86,15 @@ namespace Yzz
             }
             _rbs = new Rigidbody2D[players.Count()];
             _cols = new Collider2D[players.Count()];
+            if (spriteRenderers == null)
+            {
+                
+                spriteRenderers = new SpriteRenderer[players.Count()];
+                for (int i = 0; i < players.Count(); i++)
+                {
+                    spriteRenderers[i] = players[i].GetComponentInChildren<SpriteRenderer>();
+                }
+            }
             
             for (int i = 0; i < players.Count(); i++)
             {
@@ -97,7 +110,9 @@ namespace Yzz
                 _rbs[i].gravityScale = gravityScale;
                 _rbs[i].interpolation = RigidbodyInterpolation2D.Interpolate;
                 _rbs[i].collisionDetectionMode = CollisionDetectionMode2D.Continuous;
+
             }
+            
             InitTransformOffsets();
             ChangeCur(0);
 
@@ -199,6 +214,23 @@ namespace Yzz
             else if (_coyoteCounter > 0f)
                 _coyoteCounter -= Time.deltaTime;
 
+            // 朝左走时 flipX，朝右走时不 flip
+            if (spriteRenderers != null)
+            {
+                
+
+                foreach (var sr in spriteRenderers)
+                {
+                    if (_inputX < 0f)
+                    {
+                        sr.flipX = true;
+                    } else if (_inputX > 0f) {
+                        sr.flipX = false;
+                    }
+                }
+                
+                
+            }
 
             
             if (mask.isInMask(players[curIndex].transform.position))
