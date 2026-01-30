@@ -78,6 +78,11 @@ namespace Yzz
         /// <summary> 每次着地只允许起跳一次，防止接地判定连续为 true 时重复加跳跃力 </summary>
         private bool _hasJumpedSinceGrounded = true;
 
+        /// <summary> Model 层 / 动画层可读：当前速度 </summary>
+        public Vector2 Velocity => _rbs[curIndex] != null ? _rbs[curIndex].velocity : Vector2.zero;
+        /// <summary> Model 层 / 动画层可读：是否在地面 </summary>
+        public bool IsGroundedState => IsGrounded();
+
         private void InitPlayers()
         {
             if (groundLayers.Count() != players.Count())
@@ -232,7 +237,12 @@ namespace Yzz
                 
             }
 
+            SyncTransform();
             
+        }
+
+        private void FixedUpdate()
+        {
             if (mask.isInMask(players[curIndex].transform.position))
             {
                 if (curIndex != 1)
@@ -243,10 +253,6 @@ namespace Yzz
                 if (curIndex != 0)
                 ChangeCur(0);
             }
-        }
-
-        private void FixedUpdate()
-        {
             // 跌落重生：低于阈值则传回初始位置并重置速度/计时
             if (players[curIndex].transform.position.y < respawnY)
             {
@@ -300,7 +306,7 @@ namespace Yzz
             else
                 _rbs[curIndex].gravityScale = gravityScale;
 
-            SyncTransform();
+            
         }
 
         private bool IsGrounded()

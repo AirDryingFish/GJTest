@@ -11,7 +11,7 @@ namespace Yzz
     {
         [Header("References")]
         [Tooltip("不指定则用同物体上的 PlayerController")]
-        [SerializeField] private PlayerController playerController;
+        [SerializeField] private MulPlayerController mulPlayerController;
         [Tooltip("不指定则用同物体上的 Animator")]
         [SerializeField] private Animator animator;
 
@@ -27,26 +27,26 @@ namespace Yzz
 
         private void Awake()
         {
-            if (playerController == null) playerController = GetComponent<PlayerController>();
+            if (mulPlayerController == null) mulPlayerController = GetComponent<MulPlayerController>();
             if (animator == null) animator = GetComponent<Animator>();
         }
 
         private void Update()
         {
-            if (playerController == null || animator == null) return;
+            if (mulPlayerController == null || animator == null) return;
 
-            Vector2 v = playerController.Velocity;
-            bool grounded = playerController.IsGroundedState;
+            Vector2 v = mulPlayerController.Velocity;
+            bool grounded = mulPlayerController.IsGroundedState;
             bool walking = grounded && Mathf.Abs(v.x) > walkSpeedThreshold;
 
             if (!string.IsNullOrEmpty(paramIsWalking))
                 animator.SetBool(paramIsWalking, walking);
-            if (!string.IsNullOrEmpty(paramSpeedX))
-                animator.SetFloat(paramSpeedX, v.x);
-            if (!string.IsNullOrEmpty(paramSpeedY))
-                animator.SetFloat(paramSpeedY, v.y);
-            if (!string.IsNullOrEmpty(paramIsGrounded))
-                animator.SetBool(paramIsGrounded, grounded);
+            // if (!string.IsNullOrEmpty(paramSpeedX))
+            //     animator.SetFloat(paramSpeedX, v.x);
+            // if (!string.IsNullOrEmpty(paramSpeedY))
+            //     animator.SetFloat(paramSpeedY, v.y);
+            // if (!string.IsNullOrEmpty(paramIsGrounded))
+            //     animator.SetBool(paramIsGrounded, grounded);
         }
     }
 }
