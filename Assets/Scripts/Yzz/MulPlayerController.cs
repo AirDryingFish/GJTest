@@ -37,6 +37,12 @@ namespace Yzz
         [Tooltip("表面法线 Y 至少为此值才算“踩在地面”（避免贴墙时把墙当地面）")]
         [Range(0.3f, 1f)]
         [SerializeField] private float minGroundNormalY = 0.5f;
+        [Tooltip("尖角/陡坡：法线 Y 达到此值也允许起跳，纯墙(0)仍不算；应小于上面一项")]
+        [Range(0.15f, 0.6f)]
+        [SerializeField] private float minGroundNormalYCorner = 0.25f;
+        [Tooltip("下尖角(V形底)：向下斜射线与竖直夹角(度)，0=不检测，约 25~40 可踩住 V 形底")]
+        [Range(0f, 50f)]
+        [SerializeField] private float groundCheckAngleDown = 30f;
         [Tooltip("侧面射线长度，用于检测贴墙；空中贴墙时不往墙里推，避免卡住不下落")]
         [SerializeField] private float wallCheckDistance = 0.08f;
 
@@ -49,6 +55,16 @@ namespace Yzz
         [Header("Feel (Coyote & Buffer)")]
         [SerializeField] private float coyoteTime = 0.12f;
         [SerializeField] private float jumpBufferTime = 0.12f;
+
+        [Header("Stuck Push (卡住反推)")]
+        [Tooltip("按住 AD 朝某方向走，超过此时间且水平位移几乎为 0 时，沿反方向推一点距离")]
+        [SerializeField] private float stuckPushDuration = 0.35f;
+        [Tooltip("这段时间内水平位移小于此值则判定为卡住")]
+        [SerializeField] private float stuckDisplacementThreshold = 0.02f;
+        [Tooltip("卡住时沿反方向推出的位移。建议 ≈ moveSpeed×0.02～0.03（如 moveSpeed=8 用 0.16～0.24），过小推不开仍不响应 AD")]
+        [SerializeField] private float stuckPushDistance = 0.2f;
+        [Tooltip("反推时同时给的瞬时水平速度（反方向），便于脱离贴墙后立刻响应 AD；0 则仅位移。建议约为 moveSpeed 的 0.2～0.5")]
+        [SerializeField] private float stuckPushVelocity = 2.5f;
 
         [Header("Respawn")]
         [Tooltip("当角色的 Y 坐标低于此值时，会被传回初始出生点")]
@@ -97,6 +113,9 @@ namespace Yzz
         private bool _hasJumpedSinceGrounded = true;
         /// <summary> judgePoint 是否在对应 Ground/Ground2 层内，用于 IsGrounded 时把 Mask 层也算地面 </summary>
         private bool _isInside;
+        private float _stuckPushTimer;
+        private float _stuckPushStartPosX;
+        private int _stuckPushDirection; // 1 或 -1，0 表示未在计时
 
         /// <summary> Model 层 / 动画层可读：当前速度 </summary>
         public Vector2 Velocity => _rbs[curIndex] != null ? _rbs[curIndex].velocity : Vector2.zero;
@@ -298,6 +317,53 @@ namespace Yzz
 
         private void FixedUpdate()
         {
+            var rb = _rbs[curIndex];
+            float posX = rb.position.x;
+            int inputSign = Mathf.Abs(_inputX) > 0.1f ? (int)Mathf.Sign(_inputX) : 0;
+
+            // 卡住反推：按住 AD 一段时间内水平位移接近 0 则沿反方向推一点
+            if (inputSign != 0)
+            {
+                if (_stuckPushDirection != inputSign)
+                {
+                    _stuckPushDirection = inputSign;
+                    _stuckPushStartPosX = posX;
+                    _stuckPushTimer = 0f;
+                }
+                _stuckPushTimer += Time.fixedDeltaTime;
+                if (_stuckPushTimer >= stuckPushDuration)
+                {
+                    float displacement = posX - _stuckPushStartPosX;
+                    if (Mathf.Abs(displacement) < stuckDisplacementThreshold)
+                    {
+                        int pushSign = -_stuckPushDirection;
+                        rb.position += Vector2.right * pushSign * stuckPushDistance;
+                        if (stuckPushVelocity > 0f)
+                            rb.velocity = new Vector2(pushSign * stuckPushVelocity, rb.velocity.y);
+                        _stuckPushTimer = 0f;
+                        _stuckPushStartPosX = rb.position.x;
+                    }
+                    else
+                    {
+                        _stuckPushStartPosX = posX;
+                        _stuckPushTimer = 0f;
+                    }
+                }
+            }
+            else
+            {
+                _stuckPushDirection = 0;
+                _stuckPushTimer = 0f;
+            }
+
+            if (IsGrounded() && Mathf.Abs(_inputX) > 0.1f)
+            {
+                // 被卡住：有输入但速度上不去（即时逃逸，与上面的“过一段时间”反推互补）
+                if (Mathf.Abs(rb.velocity.x) < 0.05f && rb.velocity.y <= 0.01f)
+                {
+                    rb.position += Vector2.up * 0.03f + Vector2.right * (-Mathf.Sign(_inputX)) * 0.01f;
+                }
+            }
             if (mask.isInMask(judgePointM.position))
             {
                 if (curIndex != 1)
@@ -385,7 +451,7 @@ namespace Yzz
             if (_isInside)
                 layers |= LayerMask.GetMask("Mask");
             float extX = _cols[curIndex] != null ? _cols[curIndex].bounds.extents.x * groundCheckWidthFactor : 0f;
-            // 左、中、右三条射线，站在尖角/窄台上时至少一条能命中“朝上”的地面
+            // 左、中、右三条竖直射线，站在尖角/窄台上时至少一条能命中“朝上”的地面
             Vector2[] offsets = { new Vector2(-extX, 0f), Vector2.zero, new Vector2(extX, 0f) };
             for (int i = 0; i < offsets.Length; i++)
             {
@@ -393,28 +459,48 @@ namespace Yzz
                 RaycastHit2D hit = Physics2D.Raycast(origin, Vector2.down, groundCheckDistance, layers);
                 if (!hit) continue;
                 if (_cols[curIndex] != null && hit.collider == _cols[curIndex]) continue;
-                if (hit.normal.y < minGroundNormalY) continue;
-                return true;
+                if (hit.normal.y >= minGroundNormalY || hit.normal.y >= minGroundNormalYCorner)
+                    return true;
+            }
+            // 下尖角(V形底)：竖直射线易从尖端漏过，加两条向下斜射线打两侧斜面
+            if (groundCheckAngleDown > 0.01f)
+            {
+                float rad = groundCheckAngleDown * Mathf.Deg2Rad;
+                Vector2 downL = new Vector2(-Mathf.Sin(rad), -Mathf.Cos(rad));
+                Vector2 downR = new Vector2(Mathf.Sin(rad), -Mathf.Cos(rad));
+                RaycastHit2D hitL = Physics2D.Raycast(baseOrigin, downL, groundCheckDistance, layers);
+                RaycastHit2D hitR = Physics2D.Raycast(baseOrigin, downR, groundCheckDistance, layers);
+                if (hitL && hitL.collider != _cols[curIndex] && hitL.normal.y >= minGroundNormalYCorner) return true;
+                if (hitR && hitR.collider != _cols[curIndex] && hitR.normal.y >= minGroundNormalYCorner) return true;
             }
             return false;
         }
 
-        /// <summary> 检测左侧(-1)或右侧(1)是否有墙/障碍，用于空中贴墙时不往墙里推。站在尖角上时脚下平台不算墙，避免卡住。 </summary>
+        /// <summary> 检测左侧(-1)或右侧(1)是否有墙/障碍，用于空中贴墙时不往墙里推。站在尖角/下尖角时不算墙，避免卡住。 </summary>
         private bool CheckWall(int direction)
         {
+
+
             if (_cols[curIndex] == null) return false;
             float extX = _cols[curIndex].bounds.extents.x;
-            Vector2 origin = (Vector2)players[curIndex].transform.position + new Vector2(direction * extX, 0f);
+            Vector2 pos = (Vector2)judgePointM.position;
+            Vector2 origin = pos + new Vector2(direction * extX, 0f);
             Vector2 dir = new Vector2(direction, 0f);
             LayerMask layers = groundLayers[curIndex];
             if (_isInside) layers |= LayerMask.GetMask("Mask");
             RaycastHit2D hit = Physics2D.Raycast(origin, dir, wallCheckDistance, layers);
             if (!hit) return false;
+            // 法线向上，说明是拐角或地面边缘，不当作墙
+            if (hit.normal.y > 0.2f)
+                return false;
             if (hit.collider == _cols[curIndex]) return false;
+            // 下尖角/屋檐：命中面朝下(normal.y<0) 或 命中点在角色上方 → 是“头顶/身下”的斜面，不挡左右移动
+            if (hit.normal.y < 0f || hit.point.y > pos.y + 0.05f)
+                return false;
             // 若脚下射线打中的是同一碰撞体且法线朝上，说明是站在该平台（尖角/边缘），不当作阻挡墙
-            Vector2 feetOrigin = (Vector2)players[curIndex].transform.position + groundCheckOffset;
+            Vector2 feetOrigin = pos + groundCheckOffset;
             RaycastHit2D feetHit = Physics2D.Raycast(feetOrigin, Vector2.down, groundCheckDistance, layers);
-            if (feetHit && feetHit.collider == hit.collider && feetHit.normal.y >= minGroundNormalY)
+            if (feetHit && feetHit.collider == hit.collider && feetHit.normal.y >= minGroundNormalYCorner)
                 return false;
             return true;
         }

@@ -577,7 +577,7 @@ BoxCollider2D:
   m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 0.03163798, y: -0.07479784}
+  m_Offset: {x: 0.03055869, y: -0.07479784}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
@@ -588,7 +588,7 @@ BoxCollider2D:
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 0.2146441, y: 0.8504043}
+  m_Size: {x: 0.20816663, y: 0.8504043}
   m_EdgeRadius: 0
 --- !u!212 &211491973
 SpriteRenderer:
@@ -1083,6 +1083,8 @@ MonoBehaviour:
   groundCheckWidthFactor: 0.162
   groundCheckOffset: {x: 0, y: -0.1}
   minGroundNormalY: 0.5
+  minGroundNormalYCorner: 0.25
+  groundCheckAngleDown: 50
   wallCheckDistance: 0.08
   sprintMultiplier: 1.5
   sprintAccelerationMultiplier: 1.15
@@ -1095,11 +1097,6 @@ MonoBehaviour:
   - {fileID: 677161086}
   - {fileID: 108570377}
   - {fileID: 1334086348}
-  - {fileID: 754075156}
-  - {fileID: 936533324}
-  - {fileID: 1788992731}
-  - {fileID: 186483796}
-  - {fileID: 1265966092}
   ground2LayerColliders:
   - {fileID: 0}
   - {fileID: 711073563}
