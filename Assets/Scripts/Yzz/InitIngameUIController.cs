@@ -5,6 +5,7 @@ using UnityEngine;
 public class InitIngameUIController : MonoBehaviour
 {
     public GameObject uiprefab;
+    // public IngameUIConqtroller uiController;
     // Start is called before the first frame update
     void Start()
     {
