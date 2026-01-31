@@ -131,7 +131,7 @@ namespace Yzz
         {
             if (groundLayers.Count() != players.Count())
             {
-                Debug.LogError($"GroundLayers(count:{groundLayers.Count()}) has different count as players(count:{players.Count()}) ");
+                // Debug.LogError($"GroundLayers(count:{groundLayers.Count()}) has different count as players(count:{players.Count()}) ");
             }
             _rbs = new Rigidbody2D[players.Count()];
             _cols = new Collider2D[players.Count()];
@@ -149,11 +149,11 @@ namespace Yzz
             {
                 if (!players[i].TryGetComponent(out _cols[i]))
                 {
-                    Debug.LogError($"Failed to get Collider at players[{i}] ({players[i].name})");
+                    // Debug.LogError($"Failed to get Collider at players[{i}] ({players[i].name})");
                 }
                 if (!players[i].TryGetComponent(out _rbs[i]))
                 {
-                    Debug.LogError($"Failed to get Rigidbody at players[{i}] ({players[i].name})");
+                    // Debug.LogError($"Failed to get Rigidbody at players[{i}] ({players[i].name})");
                     continue;
                 }
                 _rbs[i].gravityScale = gravityScale;
@@ -188,7 +188,7 @@ namespace Yzz
         {
             if (c >= players.Count() || c < 0)
             {
-                Debug.LogError($"{c} is not a valid index");
+                // Debug.LogError($"{c} is not a valid index");
                 return;
             }
             var v = _rbs[curIndex].velocity;
@@ -250,7 +250,7 @@ namespace Yzz
 
             if (mask == null)
             {
-                Debug.LogError("Mask object is null");
+                // Debug.LogError("Mask object is null");
             }
 
         }
@@ -559,8 +559,8 @@ namespace Yzz
                 Collider2D col = Physics2D.OverlapPoint(worldPoint, groundMask);
                 inside = col != null;
                 colInfo = col != null ? $"{col.name}(layer={LayerMask.LayerToName(col.gameObject.layer)})" : "null";
-                if (Time.frameCount % 20 == 0)
-                    Debug.Log($"[isInside] curIndex=1 → 用 Ground 层 | worldPoint={worldPoint} | OverlapPoint 命中={col != null} | col={colInfo} → inside={inside}");
+                // if (Time.frameCount % 20 == 0)
+                //     Debug.Log($"[isInside] curIndex=1 → 用 Ground 层 | worldPoint={worldPoint} | OverlapPoint 命中={col != null} | col={colInfo} → inside={inside}");
             }
             else if (curIndex == 0)
             {
@@ -568,19 +568,19 @@ namespace Yzz
                 Collider2D col = Physics2D.OverlapPoint(worldPoint, ground2Mask);
                 inside = col != null;
                 colInfo = col != null ? $"{col.name}(layer={LayerMask.LayerToName(col.gameObject.layer)})" : "null";
-                if (Time.frameCount % 20 == 0)
-                    Debug.Log($"[isInside] curIndex=0 → 用 Ground2 层 | worldPoint={worldPoint} | OverlapPoint 命中={col != null} | col={colInfo} → inside={inside}");
+                // if (Time.frameCount % 20 == 0)
+                    // Debug.Log($"[isInside] curIndex=0 → 用 Ground2 层 | worldPoint={worldPoint} | OverlapPoint 命中={col != null} | col={colInfo} → inside={inside}");
             }
-            else if (Time.frameCount % 20 == 0)
-            {
-                Debug.Log($"[isInside] curIndex={curIndex} 不在 0/1，未检测层 → inside 保持 false");
-            }
+            // else if (Time.frameCount % 20 == 0)
+            // {
+            //     Debug.Log($"[isInside] curIndex={curIndex} 不在 0/1，未检测层 → inside 保持 false");
+            // }
             _isInside = inside;
             mask.isInsideGround = inside;
             maskEdgeCollider.enabled = inside;
             // 限频调试：每 20 帧打一次；确认完可注释
-            if (Time.frameCount % 20 == 0)
-                Debug.Log($"[MaskEdge] curIndex={curIndex}, worldPoint={worldPoint}, col={colInfo},  inside={inside}, enabled={maskEdgeCollider.enabled}");
+            // if (Time.frameCount % 20 == 0)
+            //     Debug.Log($"[MaskEdge] curIndex={curIndex}, worldPoint={worldPoint}, col={colInfo},  inside={inside}, enabled={maskEdgeCollider.enabled}");
         }
 
         // private void OnDrawGizmosSelected()
