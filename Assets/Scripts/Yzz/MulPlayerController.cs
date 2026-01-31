@@ -392,6 +392,7 @@ namespace Yzz
                     var dd = _offsets[curIndex] - _offsets[0];
                     players[curIndex].transform.position = _spawnPosition + (Vector2)dd;
                 }
+                mask.RespawnToInitPos();
                 _coyoteCounter = coyoteTime;
                 _jumpBufferCounter = 0f;
                 _hasJumpedSinceGrounded = false;

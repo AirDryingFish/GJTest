@@ -25,6 +25,8 @@ public class DraggableMask : MonoBehaviour
 
     public bool isInsideGround = false;
 
+    public Vector3 initWorldPos;
+
     void Awake()
     {
         _collider = GetComponent<Collider2D>();
@@ -82,6 +84,11 @@ public class DraggableMask : MonoBehaviour
     public bool isInMask(Vector2 worldPos)
     {
         return _collider.OverlapPoint(worldPos);
+    }
+
+    public void RespawnToInitPos()
+    {
+        _rb.MovePosition(initWorldPos);
     }
 }
 
