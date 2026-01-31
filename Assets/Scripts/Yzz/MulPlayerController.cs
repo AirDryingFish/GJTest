@@ -30,6 +30,9 @@ namespace Yzz
         [SerializeField] private LayerMask[] groundLayers;
         [Tooltip("脚下射线检测长度，只检测正下方的地面")]
         [SerializeField] private float groundCheckDistance = 0.2f;
+        [Tooltip("地面检测左右射线相对中心的偏移（占 collider 宽度比例），尖角/窄台用多射线更稳")]
+        [Range(0f, 0.5f)]
+        [SerializeField] private float groundCheckWidthFactor = 0.35f;
         [SerializeField] private Vector2 groundCheckOffset = new Vector2(0f, -0.05f);
         [Tooltip("表面法线 Y 至少为此值才算“踩在地面”（避免贴墙时把墙当地面）")]
         [Range(0.3f, 1f)]
@@ -372,28 +375,42 @@ namespace Yzz
 
         private bool IsGrounded()
         {
-            Vector2 origin = (Vector2)players[curIndex].transform.position + groundCheckOffset;
+            Vector2 baseOrigin = (Vector2)players[curIndex].transform.position + groundCheckOffset;
             LayerMask layers = groundLayers[curIndex];
             if (_isInside)
                 layers |= LayerMask.GetMask("Mask");
-            RaycastHit2D hit = Physics2D.Raycast(origin, Vector2.down, groundCheckDistance, layers);
-            if (!hit) return false;
-            if (_cols[curIndex] != null && hit.collider == _cols[curIndex]) return false;
-            // 只算“脚下方、表面朝上”的地面，贴墙时墙的法线是水平的，不会判成地面，避免卡墙不下落
-            if (hit.normal.y < minGroundNormalY) return false;
-            return true;
+            float extX = _cols[curIndex] != null ? _cols[curIndex].bounds.extents.x * groundCheckWidthFactor : 0f;
+            // 左、中、右三条射线，站在尖角/窄台上时至少一条能命中“朝上”的地面
+            Vector2[] offsets = { new Vector2(-extX, 0f), Vector2.zero, new Vector2(extX, 0f) };
+            for (int i = 0; i < offsets.Length; i++)
+            {
+                Vector2 origin = baseOrigin + offsets[i];
+                RaycastHit2D hit = Physics2D.Raycast(origin, Vector2.down, groundCheckDistance, layers);
+                if (!hit) continue;
+                if (_cols[curIndex] != null && hit.collider == _cols[curIndex]) continue;
+                if (hit.normal.y < minGroundNormalY) continue;
+                return true;
+            }
+            return false;
         }
 
-        /// <summary> 检测左侧(-1)或右侧(1)是否有墙/障碍，用于空中贴墙时不往墙里推 </summary>
+        /// <summary> 检测左侧(-1)或右侧(1)是否有墙/障碍，用于空中贴墙时不往墙里推。站在尖角上时脚下平台不算墙，避免卡住。 </summary>
         private bool CheckWall(int direction)
         {
             if (_cols[curIndex] == null) return false;
             float extX = _cols[curIndex].bounds.extents.x;
             Vector2 origin = (Vector2)players[curIndex].transform.position + new Vector2(direction * extX, 0f);
             Vector2 dir = new Vector2(direction, 0f);
-            RaycastHit2D hit = Physics2D.Raycast(origin, dir, wallCheckDistance, groundLayers[curIndex]);
+            LayerMask layers = groundLayers[curIndex];
+            if (_isInside) layers |= LayerMask.GetMask("Mask");
+            RaycastHit2D hit = Physics2D.Raycast(origin, dir, wallCheckDistance, layers);
             if (!hit) return false;
             if (hit.collider == _cols[curIndex]) return false;
+            // 若脚下射线打中的是同一碰撞体且法线朝上，说明是站在该平台（尖角/边缘），不当作阻挡墙
+            Vector2 feetOrigin = (Vector2)players[curIndex].transform.position + groundCheckOffset;
+            RaycastHit2D feetHit = Physics2D.Raycast(feetOrigin, Vector2.down, groundCheckDistance, layers);
+            if (feetHit && feetHit.collider == hit.collider && feetHit.normal.y >= minGroundNormalY)
+                return false;
             return true;
         }
 
