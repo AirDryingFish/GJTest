@@ -8,6 +8,11 @@ namespace Yzz
     /// </summary>
     public class InitSceneLoader : MonoBehaviour
     {
+        /// <summary>
+        /// 从游戏中返回时设为 true，BeginScene 加载后会自动调用 ShowLevelSelect() 并重置为 false。
+        /// </summary>
+        public static bool ShowLevelSelectOnLoad;
+
         [SerializeField] private Button button;
         [Tooltip("点击按钮后隐藏的 Canvas（如主菜单）")]
         [SerializeField] private Canvas canvasToHide;
@@ -18,6 +23,11 @@ namespace Yzz
         {
             if (button != null)
                 button.onClick.AddListener(ShowLevelSelect);
+            if (ShowLevelSelectOnLoad)
+            {
+                ShowLevelSelectOnLoad = false;
+                ShowLevelSelect();
+            }
         }
 
         private void OnDestroy()
@@ -32,6 +42,11 @@ namespace Yzz
                 canvasToHide.gameObject.SetActive(false);
             if (canvasToShow != null)
                 canvasToShow.gameObject.SetActive(true);
+        }
+
+        public void BackFromGame()
+        {
+            ShowLevelSelect();
         }
     }
 }
