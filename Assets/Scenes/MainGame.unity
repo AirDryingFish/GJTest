@@ -510,7 +510,7 @@ SpriteRenderer:
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
-  m_MaskInteraction: 2
+  m_MaskInteraction: 1
   m_SpriteSortPoint: 0
 --- !u!1 &211491970
 GameObject:
@@ -640,7 +640,7 @@ SpriteRenderer:
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
-  m_MaskInteraction: 2
+  m_MaskInteraction: 1
   m_SpriteSortPoint: 0
 --- !u!1 &226017884
 GameObject:
@@ -770,7 +770,7 @@ SpriteRenderer:
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
-  m_MaskInteraction: 2
+  m_MaskInteraction: 1
   m_SpriteSortPoint: 0
 --- !u!1 &397097294
 GameObject:
@@ -1145,7 +1145,7 @@ Rigidbody2D:
     m_Bits: 0
   m_Interpolate: 0
   m_SleepingMode: 1
-  m_CollisionDetection: 0
+  m_CollisionDetection: 1
   m_Constraints: 4
 --- !u!70 &563763686
 CapsuleCollider2D:
@@ -1663,7 +1663,7 @@ SpriteRenderer:
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
-  m_MaskInteraction: 2
+  m_MaskInteraction: 1
   m_SpriteSortPoint: 0
 --- !u!1 &726088352
 GameObject:
@@ -1793,7 +1793,7 @@ SpriteRenderer:
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
-  m_MaskInteraction: 2
+  m_MaskInteraction: 1
   m_SpriteSortPoint: 0
 --- !u!1 &740806307
 GameObject:
@@ -1923,7 +1923,7 @@ SpriteRenderer:
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
-  m_MaskInteraction: 2
+  m_MaskInteraction: 1
   m_SpriteSortPoint: 0
 --- !u!1 &754075154
 GameObject:
@@ -2138,7 +2138,7 @@ SpriteRenderer:
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 1
   m_WasSpriteAssigned: 1
-  m_MaskInteraction: 2
+  m_MaskInteraction: 1
   m_SpriteSortPoint: 0
 --- !u!114 &765922292
 MonoBehaviour:
@@ -2154,7 +2154,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   cam: {fileID: 397097297}
   parallaxX: 0.3
-  parallaxY: 0.313
+  parallaxY: 0.3
   startOffset: {x: 0, y: 0, z: 0}
 --- !u!1 &865971323
 GameObject:
@@ -2202,7 +2202,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 130e2aba791aa704c8cb606a1bbd7b05, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mulPlayerController: {fileID: 0}
+  mulPlayerController: {fileID: 563763684}
   animator: {fileID: 865971326}
   paramIsWalking: isWalking
   paramSpeedX: speedX
@@ -2281,7 +2281,7 @@ SpriteRenderer:
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
-  m_MaskInteraction: 2
+  m_MaskInteraction: 1
   m_SpriteSortPoint: 0
 --- !u!1 &936533321
 GameObject:
@@ -2536,7 +2536,7 @@ Rigidbody2D:
     m_Bits: 0
   m_Interpolate: 0
   m_SleepingMode: 1
-  m_CollisionDetection: 0
+  m_CollisionDetection: 1
   m_Constraints: 4
 --- !u!70 &1123347239
 CapsuleCollider2D:
@@ -2701,7 +2701,7 @@ SpriteRenderer:
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
-  m_MaskInteraction: 2
+  m_MaskInteraction: 1
   m_SpriteSortPoint: 0
 --- !u!1 &1133508786
 GameObject:
@@ -2753,7 +2753,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f72002e9ef1e4d445ad7033751c4f62f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  smiTo: 2
+  smiTo: 1
 --- !u!210 &1133508789
 SortingGroup:
   m_ObjectHideFlags: 0
@@ -3362,6 +3362,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1416147363}
   - component: {fileID: 1416147364}
+  - component: {fileID: 1416147365}
   m_Layer: 0
   m_Name: "\u80CC\u666F1\u4E0A\u8272"
   m_TagString: Untagged
@@ -3436,6 +3437,22 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 2
   m_SpriteSortPoint: 0
+--- !u!114 &1416147365
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1416147362}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4213002e1900f4940a410e3527604488, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cam: {fileID: 397097297}
+  parallaxX: 0.3
+  parallaxY: 0.3
+  startOffset: {x: 0, y: 0, z: 0}
 --- !u!1 &1417173513
 GameObject:
   m_ObjectHideFlags: 0
@@ -3824,7 +3841,7 @@ Transform:
   m_GameObject: {fileID: 1625244227}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 8.47, y: 2.5, z: 0}
+  m_LocalPosition: {x: 9.67, y: 2.5, z: 0}
   m_LocalScale: {x: 16.1, y: 9.91, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:

@@ -4,9 +4,8 @@ namespace Yzz
 {
     /// <summary>
     /// Model 层：根据 PlayerController 的速度等状态驱动 Animator 参数。
-    /// 挂到玩家物体上，指定 Animator 和 PlayerController；在 Animator Controller 里建好对应参数（如 isWalking）。
+    /// 挂到玩家物体上，指定 Animator 和 PlayerController；Animator 可在本物体或子物体上。在 Animator Controller 里建好对应参数（如 isWalking、jump）。
     /// </summary>
-    [RequireComponent(typeof(Animator))]
     public class PlayerModel : MonoBehaviour
     {
         [Header("References")]
@@ -28,8 +27,15 @@ namespace Yzz
 
         private void Awake()
         {
+            // Controller 可能在父物体上（MulPlayerController 管理 players[] 时）
             if (mulPlayerController == null) mulPlayerController = GetComponent<MulPlayerController>();
+            if (mulPlayerController == null) mulPlayerController = GetComponentInParent<MulPlayerController>();
+            // Animator 常在子物体上（如 Visual/Model 子节点）
             if (animator == null) animator = GetComponent<Animator>();
+            if (animator == null) animator = GetComponentInChildren<Animator>();
+            // 与物理同帧更新，这样在 FixedUpdate 里调 TriggerJump() 时，本帧 Animator 就能看到 trigger，避免“到最高点才播”
+            if (animator != null)
+                animator.updateMode = AnimatorUpdateMode.AnimatePhysics;
         }
 
         private void Update()
@@ -42,13 +48,20 @@ namespace Yzz
 
             if (!string.IsNullOrEmpty(paramIsWalking))
                 animator.SetBool(paramIsWalking, walking);
+            if (!string.IsNullOrEmpty(paramSpeedX))
+                animator.SetFloat(paramSpeedX, v.x);
+            if (!string.IsNullOrEmpty(paramSpeedY))
+                animator.SetFloat(paramSpeedY, v.y);
+            if (!string.IsNullOrEmpty(paramIsGrounded))
+                animator.SetBool(paramIsGrounded, grounded);
         }
 
         /// <summary> 由 MulPlayerController 在起跳时调用，触发 Animator 的 jump trigger。 </summary>
         public void TriggerJump()
         {
-            if (animator != null && !string.IsNullOrEmpty(paramJump))
-                animator.SetTrigger(paramJump);
+            print("TriggerJump: " + paramJump);
+            if (animator == null || string.IsNullOrEmpty(paramJump)) return;
+            animator.SetTrigger(paramJump);
         }
     }
 }
