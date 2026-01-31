@@ -790,14 +790,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   levels:
   - button: {fileID: 1034313587}
-    sceneName: MainGame
+    sceneName: MainGame1
     lockImage: {fileID: 0}
   - button: {fileID: 678020984}
-    sceneName: EP2
-    lockImage: {fileID: 0}
+    sceneName: MainGame2
+    lockImage: {fileID: 897353259}
   - button: {fileID: 2048008069}
     sceneName: 
-    lockImage: {fileID: 0}
+    lockImage: {fileID: 1310893678}
 --- !u!1 &678020982
 GameObject:
   m_ObjectHideFlags: 0
