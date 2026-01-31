@@ -247,6 +247,7 @@ MonoBehaviour:
   paramSpeedX: speedX
   paramSpeedY: speedY
   paramIsGrounded: isGrounded
+  paramJump: jump
   walkSpeedThreshold: 0
 --- !u!1 &108570375
 GameObject:
@@ -1912,13 +1913,13 @@ EdgeCollider2D:
   m_UsedByEffector: 0
   m_UsedByComposite: 0
   m_Offset: {x: 0, y: 0.5}
-  m_EdgeRadius: 0.35
+  m_EdgeRadius: 0.33
   m_Points:
-  - {x: 0.53, y: 0.05}
-  - {x: 0.53, y: -1.05}
-  - {x: -0.53, y: -1.05}
-  - {x: -0.53, y: 0.05}
-  - {x: 0.53, y: 0.05}
+  - {x: 0.53, y: 0}
+  - {x: 0.53, y: -1}
+  - {x: -0.53, y: -1}
+  - {x: -0.53, y: 0}
+  - {x: 0.53, y: 0}
   m_AdjacentStartPoint: {x: 0, y: 0}
   m_AdjacentEndPoint: {x: -0.5, y: 0}
   m_UseAdjacentStartPoint: 0
@@ -2008,6 +2009,7 @@ MonoBehaviour:
   paramSpeedX: speedX
   paramSpeedY: speedY
   paramIsGrounded: isGrounded
+  paramJump: jump
   walkSpeedThreshold: 0
 --- !u!95 &865971326
 Animator:
@@ -3554,7 +3556,7 @@ Transform:
   m_GameObject: {fileID: 1370545270}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 3.12, y: 2.5, z: 0}
+  m_LocalPosition: {x: 8.47, y: 2.5, z: 0}
   m_LocalScale: {x: 16.1, y: 9.91, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -4131,6 +4133,8 @@ MonoBehaviour:
   - {fileID: 1688843563}
   - {fileID: 1123347236}
   curIndex: 0
+  jumpSound: {fileID: 0}
+  warpSound: {fileID: 0}
 --- !u!1 &1764239782
 GameObject:
   m_ObjectHideFlags: 0
@@ -4210,7 +4214,7 @@ Transform:
   m_GameObject: {fileID: 1764239782}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -39.41, y: 7.3601, z: 0.1633831}
+  m_LocalPosition: {x: -36.83, y: 5.31, z: 0.1633831}
   m_LocalScale: {x: 10.423829, y: 22.346098, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

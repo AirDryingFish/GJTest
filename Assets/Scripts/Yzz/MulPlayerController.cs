@@ -353,6 +353,8 @@ namespace Yzz
                 _coyoteCounter = 0f;
                 _hasJumpedSinceGrounded = true;
                 jumpSound.Play();
+                if (players[curIndex].TryGetComponent(out PlayerModel model))
+                    model.TriggerJump();
             }
 
             // Variable jump height & fall gravity
