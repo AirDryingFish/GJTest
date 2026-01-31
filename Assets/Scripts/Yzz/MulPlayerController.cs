@@ -83,6 +83,8 @@ namespace Yzz
         /// <summary> Model 层 / 动画层可读：是否在地面 </summary>
         public bool IsGroundedState => IsGrounded();
 
+        public AudioSource jumpSound, warpSound;
+
         private void InitPlayers()
         {
             if (groundLayers.Count() != players.Count())
@@ -246,12 +248,18 @@ namespace Yzz
             if (mask.isInMask(players[curIndex].transform.position))
             {
                 if (curIndex != 1)
-                ChangeCur(1);
+                {
+                    warpSound.Play();
+                    ChangeCur(1);
+                }
                 
             } else
             {
                 if (curIndex != 0)
-                ChangeCur(0);
+                {
+                    warpSound.Play();
+                    ChangeCur(0);
+                }
             }
             // 跌落重生：低于阈值则传回初始位置并重置速度/计时
             if (players[curIndex].transform.position.y < respawnY)
@@ -296,6 +304,7 @@ namespace Yzz
                 _jumpBufferCounter = 0f;
                 _coyoteCounter = 0f;
                 _hasJumpedSinceGrounded = true;
+                jumpSound.Play();
             }
 
             // Variable jump height & fall gravity
