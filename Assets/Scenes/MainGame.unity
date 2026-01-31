@@ -1090,6 +1090,10 @@ MonoBehaviour:
   sprintAccelerationMultiplier: 1.15
   coyoteTime: 0.12
   jumpBufferTime: 0.12
+  stuckPushDuration: 0.1
+  stuckDisplacementThreshold: 0.02
+  stuckPushDistance: 0.4
+  stuckPushVelocity: 4
   respawnY: -20
   mask: {fileID: 1625244229}
   groundLayerColliders:
