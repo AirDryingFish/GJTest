@@ -42,10 +42,8 @@
       "version": "5.0.3",
       "depth": 1,
       "source": "registry",
-      "dependencies": {
-        "com.unity.modules.imgui": "1.0.0"
-      },
-      "url": "https://packages.unity.com"
+      "dependencies": {},
+      "url": "https://packages.unity.cn"
     },
     "com.unity.2d.psdimporter": {
       "version": "8.0.5",
