@@ -1083,7 +1083,7 @@ MonoBehaviour:
   groundCheckWidthFactor: 0.162
   groundCheckOffset: {x: 0, y: -0.1}
   minGroundNormalY: 0.5
-  minGroundNormalYCorner: 0.25
+  minGroundNormalYCorner: 0.566
   groundCheckAngleDown: 30
   wallCheckDistance: 0.08
   sprintMultiplier: 1.5
@@ -1092,7 +1092,7 @@ MonoBehaviour:
   jumpBufferTime: 0.12
   stuckPushDuration: 0.05
   stuckDisplacementThreshold: 0.02
-  stuckPushDistance: 0.5
+  stuckPushDistance: 0
   stuckPushVelocity: 4
   respawnY: -20
   mask: {fileID: 1625244229}
