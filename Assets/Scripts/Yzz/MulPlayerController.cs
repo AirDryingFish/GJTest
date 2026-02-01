@@ -319,9 +319,12 @@ namespace Yzz
             }
 
             SyncTransform();
-            print("curIndex: " + curIndex);
+            // print("curIndex: " + curIndex);
 
         }
+
+        private bool wallStuckOne = false;
+        private bool wallStuck = false;
 
         private void FixedUpdate()
         {
@@ -345,7 +348,8 @@ namespace Yzz
                     if (Mathf.Abs(displacement) < stuckDisplacementThreshold)
                     {
                         int pushSign = -_stuckPushDirection;
-                        rb.position += Vector2.right * pushSign * stuckPushDistance;
+                        // rb.position += Vector2.right * pushSign * stuckPushDistance;
+                        rb.MovePosition(rb.position + pushSign * stuckPushDistance * Vector2.right);
                         if (stuckPushVelocity > 0f)
                             rb.velocity = new Vector2(pushSign * stuckPushVelocity, rb.velocity.y);
                         _stuckPushTimer = 0f;
@@ -416,25 +420,46 @@ namespace Yzz
             // 空中贴墙时不再往墙里推，否则物理会把角色顶住/顶起，松键才下落
             float currentMoveSpeed = moveSpeed * (_isSprinting ? sprintMultiplier : 1f);
             float targetVelX = _inputX * currentMoveSpeed;
-            if (!grounded)
-            {
-                if (_inputX > 0f && wallRight) targetVelX = 0f;
-                if (_inputX < 0f && wallLeft) targetVelX = 0f;
-            }
+            // if (!grounded)
+            // {
+            //     if (_inputX > 0f && wallRight) targetVelX = 0f;
+            //     if (_inputX < 0f && wallLeft) targetVelX = 0f;
+            // }
+            
 
             float baseAccel = grounded ? groundAcceleration : (groundAcceleration * airControlFactor);
             float accel = baseAccel * (_isSprinting ? sprintAccelerationMultiplier : 1f);
             float newVelX = Mathf.MoveTowards(_rbs[curIndex].velocity.x, targetVelX, accel * Time.fixedDeltaTime);
+            var wallstop = (_inputX > 0f && wallRight) || (_inputX < 0f && wallLeft);
+            {
+                if (wallstop) newVelX = 0f;
+            }
+            wallStuck = !grounded && wallstop;
+            // print(wallStuck+"wallgrou"+grounded);
             _rbs[curIndex].velocity = new Vector2(newVelX, _rbs[curIndex].velocity.y);
-
+            if (wallStuck && !wallStuckOne)
+            {
+                wallStuckOne = true;
+            }
+            if (wallStuck)
+            {
+                
+                _coyoteCounter = coyoteTime*2f;
+                
+            }
             // Jump: 每次着地只执行一次，避免重叠/误判时每帧加力
-            bool canJump = !_hasJumpedSinceGrounded && (_coyoteCounter > 0f || grounded);
+            bool canJump = (!_hasJumpedSinceGrounded || wallStuckOne) && (_coyoteCounter > 0f || grounded || wallStuck);
             if (_jumpBufferCounter > 0f && canJump)
             {
                 _rbs[curIndex].velocity = new Vector2(_rbs[curIndex].velocity.x, jumpForce);
+                if (wallStuck)
+                {
+                    _rbs[curIndex].velocity += new Vector2(-Mathf.Sign(_inputX) * 0.1f,0);
+                }
                 _jumpBufferCounter = 0f;
                 _coyoteCounter = 0f;
                 _hasJumpedSinceGrounded = true;
+                wallStuckOne = false;
                 _animatorGroundedGraceRemaining = animatorGroundedGraceAfterJump; // 起跳后短时间内对动画层不报“接地”，避免 Jump 未播完就切 Walk
                 jumpSound.Play();
                 foreach (var playerModel in playerModels)
@@ -470,7 +495,9 @@ namespace Yzz
                 if (!hit) continue;
                 if (_cols[curIndex] != null && hit.collider == _cols[curIndex]) continue;
                 if (hit.normal.y >= minGroundNormalY || hit.normal.y >= minGroundNormalYCorner)
+                {
                     return true;
+                }
             }
             // 下尖角(V形底)：竖直射线易从尖端漏过，加两条向下斜射线打两侧斜面
             if (groundCheckAngleDown > 0.01f)
@@ -480,8 +507,14 @@ namespace Yzz
                 Vector2 downR = new Vector2(Mathf.Sin(rad), -Mathf.Cos(rad));
                 RaycastHit2D hitL = Physics2D.Raycast(baseOrigin, downL, groundCheckDistance, layers);
                 RaycastHit2D hitR = Physics2D.Raycast(baseOrigin, downR, groundCheckDistance, layers);
-                if (hitL && hitL.collider != _cols[curIndex] && hitL.normal.y >= minGroundNormalYCorner) return true;
-                if (hitR && hitR.collider != _cols[curIndex] && hitR.normal.y >= minGroundNormalYCorner) return true;
+                if (hitL && hitL.collider != _cols[curIndex] && hitL.normal.y >= minGroundNormalYCorner){ 
+                    // print($"{hitL.normal} {hitL.collider.name}");
+                    return true; 
+                    };
+                if (hitR && hitR.collider != _cols[curIndex] && hitR.normal.y >= minGroundNormalYCorner){ 
+                    // print($"{hitR.normal} {hitR.collider.name}");
+                    return true; 
+                    };
             }
             return false;
         }
@@ -512,6 +545,7 @@ namespace Yzz
             RaycastHit2D feetHit = Physics2D.Raycast(feetOrigin, Vector2.down, groundCheckDistance, layers);
             if (feetHit && feetHit.collider == hit.collider && feetHit.normal.y >= minGroundNormalYCorner)
                 return false;
+            // print($"{hit.normal} {feetHit.normal}");
             return true;
         }
 

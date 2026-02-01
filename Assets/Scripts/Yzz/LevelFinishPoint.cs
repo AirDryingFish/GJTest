@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -15,6 +16,20 @@ namespace Yzz
         [SerializeField] private int levelIndex = 1;
         [Tooltip("下一关的场景名，需在 Build Settings 中勾选")]
         [SerializeField] private string nextLevelSceneName = "";
+        public Transform[] keeps;
+
+
+        public Transform curEndT;
+        public Transform nextStartT;
+        public Vector3 curEnd;
+        public Vector3 nextStart;
+        public DraggableMask curMask;
+        private Vector3 curMaskPos;
+        private Vector3 curMaskEuler;
+        private Vector3 curMaskScale;
+        private Vector3 curCamPos;
+        private Vector3 curCamEuler;
+        private Vector3 curCamScale;
 
         private void OnTriggerEnter2D(Collider2D other)
         {
@@ -25,7 +40,61 @@ namespace Yzz
             LevelProgress.UnlockNextLevel(nextLevel);
 
             if (!string.IsNullOrEmpty(nextLevelSceneName))
+                foreach (var k in keeps)
+                {
+                    DontDestroyOnLoad(k);
+                }
+                recordMask();
+                SceneManager.sceneLoaded += OnSceneLoad;
                 SceneManager.LoadScene(nextLevelSceneName);
+            
         }
+
+        private void recordMask()
+        {
+            curEnd = curEndT.position;
+            nextStart = nextStartT.position;
+            curMaskPos = curMask.transform.position;
+            curMaskEuler = curMask.transform.eulerAngles;
+            curMaskScale = curMask.transform.localScale;
+            curCamPos = Camera.main.transform.position;
+            curCamEuler = Camera.main.transform.eulerAngles;
+            curCamScale = Camera.main.transform.localScale;
+        }
+
+        private void syncMask()
+        {
+            print("hahaha");
+            DraggableMask nextmask = FindFirstObjectByType<DraggableMask>();
+            nextmask.transform.position = curMaskPos;
+            nextmask.transform.eulerAngles = curMaskEuler;
+            nextmask.transform.localScale = curMaskScale;
+            Camera.main.transform.position = curCamPos;
+            Camera.main.transform.eulerAngles = curCamEuler;
+            Camera.main.transform.localScale = curCamScale;
+
+            nextmask.transform.position +=  nextStart-curEnd;
+            Camera.main.transform.position +=  nextStart-curEnd;
+            
+        }
+
+        private void ClearTran(Scene s, LoadSceneMode m)
+        {
+            foreach (var item in keeps)
+            {
+                item.gameObject.SetActive(false);
+            }
+        }
+        private void OnSceneLoad(Scene s, LoadSceneMode m)
+        {
+            SceneManager.sceneLoaded -= OnSceneLoad;
+            SceneManager.sceneLoaded += ClearTran;
+            syncMask();
+            foreach (var item in keeps)
+            {
+                item.transform.position +=  nextStart-curEnd;
+            }
+        }
+
     }
 }

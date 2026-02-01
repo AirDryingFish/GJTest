@@ -17,6 +17,10 @@ public class DraggableMask : MonoBehaviour
     private bool _isDragging = false;
     private Rigidbody2D _rb;
 
+    public LayerMask draggableMask;
+    public Vector3 draggableOffset;
+    public bool draggableDragging;
+
 
     public Vector2 epsilon = new(0.001f, 0.001f);
     public float maxSpeed = 25f;
@@ -33,13 +37,15 @@ public class DraggableMask : MonoBehaviour
         _rb = GetComponent<Rigidbody2D>();
     }
 
-    void OnMouseDown()
+    
+
+    void OnMouseDownD()
     {
         _ori_delta = cam.ScreenToWorldPoint(Input.mousePosition) - transform.position;
 
     }
 
-    void OnMouseDrag()
+    void OnMouseDragD()
     {
         _isDragging = true;
         var pos = cam.ScreenToWorldPoint(Input.mousePosition) - cam.ScreenToWorldPoint(_ori_delta);
@@ -54,14 +60,35 @@ public class DraggableMask : MonoBehaviour
         // _rb.MovePosition(new Vector3(pos.x, pos.y, 0));
     }
 
-    void OnMouseUp()
+    void OnMouseUpD()
     {
         _isDragging = false;
     }
     void Update()
     {
         target = cam.ScreenToWorldPoint(Input.mousePosition) - _ori_delta;
+        Vector3 mouseWorld = cam.ScreenToWorldPoint(Input.mousePosition);
+        if (Input.GetMouseButtonDown(0))
+        {
+            mouseWorld.z = 0f;
+            var hit = Physics2D.Raycast(mouseWorld, Vector2.zero, 0f, draggableMask);
+            if (hit.collider)
+            {
+                draggableOffset = hit.collider.transform.position - mouseWorld;
+                draggableDragging = true;
 
+                OnMouseDownD();
+            }
+        }
+        if (draggableDragging && Input.GetMouseButtonDown(0))
+        {
+            OnMouseDragD();
+        }
+        if (draggableDragging && Input.GetMouseButtonUp(0))
+        {
+            OnMouseUpD();
+            draggableDragging=false;
+        }
     }
     void FixedUpdate()
     {
