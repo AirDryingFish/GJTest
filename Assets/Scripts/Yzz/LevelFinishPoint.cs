@@ -80,6 +80,7 @@ namespace Yzz
             nextmask.transform.localScale = curMaskScale;
                 
             nextmask.transform.position +=  nextStart-curEnd;
+            nextmask.transform.position=new(nextmask.transform.position.x, nextmask.transform.position.y, 0);
             }
             Camera.main.transform.position = curCamPos;
             Camera.main.transform.eulerAngles = curCamEuler;
