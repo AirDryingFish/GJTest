@@ -2506,7 +2506,7 @@ MonoBehaviour:
     sceneName: MainGame2
     lockImage: {fileID: 897353259}
   - button: {fileID: 2048008069}
-    sceneName: 
+    sceneName: MainGame3
     lockImage: {fileID: 1310893678}
 --- !u!1 &672425491
 GameObject:
