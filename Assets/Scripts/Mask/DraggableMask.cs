@@ -42,20 +42,23 @@ public class DraggableMask : MonoBehaviour
     public Vector3 initWorldPos;
 
     [Header("滚轮缩放")]
-    [Tooltip("最小缩放（统一 scale）")]
+    [Tooltip("最小缩放倍数（相对初始 scale）")]
     [SerializeField] private float minScale = 0.3f;
-    [Tooltip("最大缩放")]
+    [Tooltip("最大缩放倍数")]
     [SerializeField] private float maxScale = 3f;
     [Tooltip("滚轮每格改变的缩放量")]
     [SerializeField] private float scrollScaleSpeed = 0.15f;
+    private Vector3 _initialLocalScale;
+    private float _scaleMultiplier = 1f;
 
     void Awake()
     {
         _collider = GetComponent<Collider2D>();
         _rb = GetComponent<Rigidbody2D>();
+        _initialLocalScale = transform.localScale;
     }
 
-    
+
 
     void OnMouseDownD()
     {
@@ -105,17 +108,20 @@ public class DraggableMask : MonoBehaviour
         if (draggableDragging && Input.GetMouseButtonUp(0))
         {
             OnMouseUpD();
-            draggableDragging=false;
+            draggableDragging = false;
         }
 
-        // 滚轮缩放：在 minScale ~ maxScale 之间
+        // 滚轮缩放：在初始 shape 上按倍数缩放，保持宽高比
         float scroll = Input.GetAxis("Mouse ScrollWheel");
         if (scroll != 0f)
         {
-            float s = transform.localScale.x;
-            s += scroll * scrollScaleSpeed;
-            s = Mathf.Clamp(s, minScale, maxScale);
-            transform.localScale = new Vector3(s, s, transform.localScale.z);
+            _scaleMultiplier += scroll * scrollScaleSpeed;
+            _scaleMultiplier = Mathf.Clamp(_scaleMultiplier, minScale, maxScale);
+            transform.localScale = new Vector3(
+                _initialLocalScale.x * _scaleMultiplier,
+                _initialLocalScale.y * _scaleMultiplier,
+                _initialLocalScale.z * _scaleMultiplier
+            );
         }
 
         // 按 R 键用曲线平滑召唤 mask 到鼠标位置
@@ -157,11 +163,12 @@ public class DraggableMask : MonoBehaviour
                 Vector2 next = Vector2.MoveTowards(_rb.position, target, maxSpeed * Time.fixedDeltaTime);
 
                 _rb.MovePosition(next);
-            } else
+            }
+            else
             {
                 _rb.MovePosition(target);
 
-                
+
             }
         }
     }
