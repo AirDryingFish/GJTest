@@ -182,7 +182,7 @@ MonoBehaviour:
   maxSpeed: 20
   target: {x: 0, y: 0}
   isInsideGround: 0
-  initWorldPos: {x: 0, y: 0, z: 0}
+  initWorldPos: {x: 9.6, y: 4.9, z: 0}
 --- !u!50 &40790755
 Rigidbody2D:
   serializedVersion: 4
@@ -1351,7 +1351,7 @@ Transform:
   m_GameObject: {fileID: 397097294}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -19.7, y: 0, z: -10}
+  m_LocalPosition: {x: -5.03, y: 0, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1383,7 +1383,7 @@ Transform:
   m_GameObject: {fileID: 400808707}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 4.7, y: 6.85, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 0.5, y: 0.5, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -3245,7 +3245,7 @@ Transform:
   m_GameObject: {fileID: 1135399271}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 231.02, y: 1.89, z: 1}
+  m_LocalPosition: {x: 238.4, y: 9.1, z: 1}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
