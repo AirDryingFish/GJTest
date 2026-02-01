@@ -21,6 +21,10 @@ namespace Yzz
 
         public Vector3 curEnd;
         public Vector3 nextStart;
+        public DraggableMask curMask;
+        private Vector3 curMaskPos;
+        private Vector3 curMaskEuler;
+        private Vector3 curMaskScale;
 
         private void OnTriggerEnter2D(Collider2D other)
         {
@@ -35,14 +39,31 @@ namespace Yzz
                 {
                     DontDestroyOnLoad(k);
                 }
+                recordMask();
                 SceneManager.sceneLoaded += OnSceneLoad;
                 SceneManager.LoadScene(nextLevelSceneName);
             
         }
 
+        private void recordMask()
+        {
+            curMaskPos = curMask.transform.position;
+            curMaskEuler = curMask.transform.eulerAngles;
+            curMaskScale = curMask.transform.localScale;
+        }
+
+        private void syncMask()
+        {
+            DraggableMask nextmask = FindFirstObjectByType<DraggableMask>();
+            nextmask.transform.position = curMaskPos;
+            nextmask.transform.eulerAngles = curMaskEuler;
+            nextmask.transform.localScale = curMaskScale;
+        }
+
         private void OnSceneLoad(Scene s, LoadSceneMode m)
         {
             SceneManager.sceneLoaded -= OnSceneLoad;
+            syncMask();
             foreach (var item in keeps)
             {
                 item.transform.position +=  nextStart-curEnd;
