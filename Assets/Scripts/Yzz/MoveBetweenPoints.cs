@@ -17,14 +17,13 @@ namespace Yzz
         private float _duration;
         private float _direction = 1f;
         
-        // 用于摩擦力/带动效果的变量
-        private Vector3 _lastPosition;
         private Vector3 _platformVelocity;
         private List<Rigidbody2D> _trackedPlayers = new List<Rigidbody2D>();
+        private Collider2D _ourCollider;
 
         private void Start()
         {
-            _lastPosition = transform.position;
+            _ourCollider = GetComponent<Collider2D>();
             RefreshDuration();
         }
 
@@ -61,16 +60,35 @@ namespace Yzz
             // 3. 实际移动平台
             transform.position = targetPos;
 
-            // 4. 关键：同步带动上方的玩家
-            foreach (var rb in _trackedPlayers)
+            // 4. 只带动仍与平台接触的玩家（OnCollisionExit2D 有时不触发，导致已离开仍被带动）
+            for (int i = _trackedPlayers.Count - 1; i >= 0; i--)
             {
-                if (rb != null)
+                Rigidbody2D rb = _trackedPlayers[i];
+                if (rb == null)
                 {
-                    // 将平台的位移直接加到玩家的 position 上
-                    // 这样即使玩家在做 velocity 运算，position 也会被同步修正
-                    rb.position += (Vector2)_platformVelocity;
+                    _trackedPlayers.RemoveAt(i);
+                    continue;
                 }
+                if (!IsStillTouching(rb))
+                {
+                    _trackedPlayers.RemoveAt(i);
+                    continue;
+                }
+                rb.position += (Vector2)_platformVelocity;
             }
+        }
+
+        /// <summary> 当前帧该刚体是否仍与本平台碰撞体接触（避免 OnCollisionExit2D 未触发时继续带动）。 </summary>
+        private bool IsStillTouching(Rigidbody2D rb)
+        {
+            if (_ourCollider == null || rb == null) return false;
+            Collider2D[] others = rb.GetComponentsInChildren<Collider2D>();
+            for (int i = 0; i < others.Length; i++)
+            {
+                if (others[i] != null && others[i].enabled && Physics2D.IsTouching(_ourCollider, others[i]))
+                    return true;
+            }
+            return false;
         }
 
         // --- 碰撞检测逻辑 ---
