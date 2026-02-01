@@ -8,7 +8,7 @@ using UnityEditor;
 namespace Yzz
 {
     /// <summary>
-    /// 挂到任意物体上，在 Inspector 里指定 Button；点击后隐藏一个 Canvas，显示另一个（关卡选择界面）。支持 Setting、Exit 按钮。
+    /// 挂到任意物体上，在 Inspector 里指定 Button；点击后隐藏一个 Canvas，显示另一个（关卡选择界面）。支持开场视频控制器、Setting、Exit 按钮。
     /// </summary>
     public class InitSceneLoader : MonoBehaviour
     {
@@ -25,6 +25,10 @@ namespace Yzz
         [Tooltip("点击按钮后显示的 Canvas（如关卡选择）")]
         [SerializeField] private Canvas canvasToShow;
 
+        [Header("开场视频（可选）")]
+        [Tooltip("若拖入，点击开始会先播开场再进关卡选择；不填则直接进关卡选择")]
+        [SerializeField] private OpeningVideoPlayer openingVideoPlayer;
+
         [Header("Setting / Exit")]
         [Tooltip("设置按钮，点击后显示设置面板")]
         [SerializeField] private Button settingButton;
@@ -35,8 +39,10 @@ namespace Yzz
 
         private void Awake()
         {
+            openingVideoPlayer.PlaySequence(null);
+
             if (button != null)
-                button.onClick.AddListener(Toggle);
+                button.onClick.AddListener(OnStartButtonClick);
             if (ShowLevelSelectOnLoad)
             {
                 ShowLevelSelectOnLoad = false;
@@ -53,7 +59,7 @@ namespace Yzz
         private void OnDestroy()
         {
             if (button != null)
-                button.onClick.RemoveListener(Toggle);
+                button.onClick.RemoveListener(OnStartButtonClick);
             if (buttonBack != null)
                 buttonBack.onClick.RemoveListener(Toggle);
             if (settingButton != null)
@@ -84,6 +90,17 @@ namespace Yzz
 #else
             Application.Quit();
 #endif
+        }
+
+        private void OnStartButtonClick()
+        {
+            if (canvasToHide != null)
+                canvasToHide.gameObject.SetActive(false);
+
+            // if (openingVideoPlayer != null)
+            //     openingVideoPlayer.PlaySequence(ShowLevelSelect);
+            // else
+            ShowLevelSelect();
         }
 
         /// <summary>
