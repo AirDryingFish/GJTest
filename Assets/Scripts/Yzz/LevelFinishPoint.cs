@@ -24,6 +24,7 @@ namespace Yzz
         public Vector3 curEnd;
         public Vector3 nextStart;
         public DraggableMask curMask;
+        private bool curMaskDrag;
         private Vector3 curMaskPos;
         private Vector3 curMaskEuler;
         private Vector3 curMaskScale;
@@ -38,6 +39,10 @@ namespace Yzz
 
             int nextLevel = Mathf.Clamp(levelIndex + 1, 1, 3);
             LevelProgress.UnlockNextLevel(nextLevel);
+            if (curEndT == null)
+            {
+                SceneManager.LoadScene(nextLevelSceneName);
+            }
 
             if (!string.IsNullOrEmpty(nextLevelSceneName))
                 foreach (var k in keeps)
@@ -52,11 +57,13 @@ namespace Yzz
 
         private void recordMask()
         {
+            
             curEnd = curEndT.position;
             nextStart = nextStartT.position;
             curMaskPos = curMask.transform.position;
             curMaskEuler = curMask.transform.eulerAngles;
             curMaskScale = curMask.transform.localScale;
+            curMaskDrag = curMask.draggableDragging;
             curCamPos = Camera.main.transform.position;
             curCamEuler = Camera.main.transform.eulerAngles;
             curCamScale = Camera.main.transform.localScale;
@@ -65,15 +72,19 @@ namespace Yzz
         private void syncMask()
         {
             print("hahaha");
+            if (curMaskDrag)
+            {
             DraggableMask nextmask = FindFirstObjectByType<DraggableMask>();
             nextmask.transform.position = curMaskPos;
             nextmask.transform.eulerAngles = curMaskEuler;
             nextmask.transform.localScale = curMaskScale;
+                
+            nextmask.transform.position +=  nextStart-curEnd;
+            }
             Camera.main.transform.position = curCamPos;
             Camera.main.transform.eulerAngles = curCamEuler;
             Camera.main.transform.localScale = curCamScale;
 
-            nextmask.transform.position +=  nextStart-curEnd;
             Camera.main.transform.position +=  nextStart-curEnd;
             
         }
