@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -15,6 +16,11 @@ namespace Yzz
         [SerializeField] private int levelIndex = 1;
         [Tooltip("下一关的场景名，需在 Build Settings 中勾选")]
         [SerializeField] private string nextLevelSceneName = "";
+        public Transform[] keeps;
+
+
+        public Vector3 curEnd;
+        public Vector3 nextStart;
 
         private void OnTriggerEnter2D(Collider2D other)
         {
@@ -25,7 +31,23 @@ namespace Yzz
             LevelProgress.UnlockNextLevel(nextLevel);
 
             if (!string.IsNullOrEmpty(nextLevelSceneName))
+                foreach (var k in keeps)
+                {
+                    DontDestroyOnLoad(k);
+                }
+                SceneManager.sceneLoaded += OnSceneLoad;
                 SceneManager.LoadScene(nextLevelSceneName);
+            
         }
+
+        private void OnSceneLoad(Scene s, LoadSceneMode m)
+        {
+            SceneManager.sceneLoaded -= OnSceneLoad;
+            foreach (var item in keeps)
+            {
+                item.transform.position +=  nextStart-curEnd;
+            }
+        }
+
     }
 }
