@@ -2425,7 +2425,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 130e2aba791aa704c8cb606a1bbd7b05, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mulPlayerController: {fileID: 0}
+  mulPlayerController: {fileID: 2012110193}
   animator: {fileID: 1180158828}
   paramIsWalking: isWalking
   paramIsRunning: isRunning
@@ -4320,10 +4320,10 @@ MonoBehaviour:
   - {fileID: 0}
   spriteRenderers:
   - {fileID: 505934225}
-  - {fileID: 0}
+  - {fileID: 1180158829}
   judgePoint: {fileID: 2048112399}
   judgePointM: {fileID: 474926431}
-  maskEdgeCollider: {fileID: 0}
+  maskEdgeCollider: {fileID: 1529822866}
   isAllSamePos: 1
   players:
   - {fileID: 2012110191}

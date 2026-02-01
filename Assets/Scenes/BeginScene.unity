@@ -3149,7 +3149,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   levelBgmClips:
   - {fileID: 8300000, guid: f47f3ccfcf19bb54bbd6236ca64cc15f, type: 3}
-  - {fileID: 0}
+  - {fileID: 8300000, guid: 99cb2afd37be1044db274892a35e39e7, type: 3}
   - {fileID: 0}
   levelSceneNames:
   - MainGame1
