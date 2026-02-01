@@ -119,8 +119,13 @@ namespace Yzz
 
         /// <summary> Model 层 / 动画层可读：当前速度 </summary>
         public Vector2 Velocity => _rbs[curIndex] != null ? _rbs[curIndex].velocity : Vector2.zero;
-        /// <summary> Model 层 / 动画层可读：是否在地面 </summary>
-        public bool IsGroundedState => IsGrounded();
+        /// <summary> Model 层 / 动画层可读：是否在地面（起跳后短暂时间内强制为 false，避免 Jump 动画未播完就切回 Walk） </summary>
+        public bool IsGroundedState => IsGrounded() && _animatorGroundedGraceRemaining <= 0f;
+        /// <summary> Model 层 / 动画层可读：是否在冲刺（按住 Shift） </summary>
+        public bool IsSprinting => _isSprinting;
+        /// <summary> 起跳后在此时间内向动画层报告“未接地”，避免 Jump→Walk 条件在起跳瞬间成立 </summary>
+        [SerializeField] private float animatorGroundedGraceAfterJump = 0.12f;
+        private float _animatorGroundedGraceRemaining;
 
         public PlayerModel[] playerModels;
 
@@ -270,6 +275,9 @@ namespace Yzz
 
         private void Update()
         {
+            if (_animatorGroundedGraceRemaining > 0f)
+                _animatorGroundedGraceRemaining -= Time.deltaTime;
+
             _inputX = Input.GetAxisRaw("Horizontal");
 
             // Sprint: 按住 Shift 加速
@@ -427,6 +435,7 @@ namespace Yzz
                 _jumpBufferCounter = 0f;
                 _coyoteCounter = 0f;
                 _hasJumpedSinceGrounded = true;
+                _animatorGroundedGraceRemaining = animatorGroundedGraceAfterJump; // 起跳后短时间内对动画层不报“接地”，避免 Jump 未播完就切 Walk
                 jumpSound.Play();
                 foreach (var playerModel in playerModels)
                 {

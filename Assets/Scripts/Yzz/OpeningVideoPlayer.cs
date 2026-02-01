@@ -26,6 +26,8 @@ namespace Yzz
         [Header("可选")]
         [Tooltip("播开场期间不激活；两段都播完后设为 active。不填则不处理。")]
         [SerializeField] private GameObject openingContainer;
+        [Tooltip("两段都播完后通过 MusicManager 播放此 BGM（loop），受设置面板音乐音量/开关控制；不填则不播放。")]
+        [SerializeField] private AudioClip bgmClip;
 
         /// <summary>
         /// 按顺序播完两组（各指定秒数）后调用 onComplete。
@@ -63,6 +65,9 @@ namespace Yzz
 
             if (openingContainer != null)
                 openingContainer.SetActive(true);
+
+            if (bgmClip != null && MusicManager.Instance != null)
+                MusicManager.Instance.PlayBGM(bgmClip);
 
             onComplete?.Invoke();
         }

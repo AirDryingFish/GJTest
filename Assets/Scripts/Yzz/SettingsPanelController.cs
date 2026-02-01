@@ -131,6 +131,7 @@ namespace Yzz
                 musicSource.volume = mute ? 0f : volume;
                 musicSource.mute = mute;
             }
+            MusicManager.Instance?.ApplyMusicSettings();
         }
 
         private void ApplySound(float volume, bool mute)

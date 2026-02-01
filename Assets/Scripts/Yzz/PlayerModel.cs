@@ -17,6 +17,7 @@ namespace Yzz
 
         [Header("Animator Parameters (名字需和 Controller 里一致)")]
         [SerializeField] private string paramIsWalking = "isWalking";
+        [SerializeField] private string paramIsRunning = "isRunning";
         [SerializeField] private string paramSpeedX = "speedX";
         [SerializeField] private string paramSpeedY = "speedY";
         [SerializeField] private string paramIsGrounded = "isGrounded";
@@ -45,10 +46,14 @@ namespace Yzz
 
             Vector2 v = mulPlayerController.Velocity;
             bool grounded = mulPlayerController.IsGroundedState;
-            bool walking = grounded && Mathf.Abs(v.x) > walkSpeedThreshold;
+            bool moving = Mathf.Abs(v.x) > walkSpeedThreshold;
+            bool walking = grounded && moving && !mulPlayerController.IsSprinting;
+            bool running = grounded && moving && mulPlayerController.IsSprinting;
 
             if (!string.IsNullOrEmpty(paramIsWalking))
                 animator.SetBool(paramIsWalking, walking);
+            if (!string.IsNullOrEmpty(paramIsRunning))
+                animator.SetBool(paramIsRunning, running);
             if (!string.IsNullOrEmpty(paramSpeedX))
                 animator.SetFloat(paramSpeedX, math.abs(v.x));
             if (!string.IsNullOrEmpty(paramSpeedY))

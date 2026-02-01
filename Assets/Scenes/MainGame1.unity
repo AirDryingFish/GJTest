@@ -1127,6 +1127,7 @@ MonoBehaviour:
   - {fileID: 563763682}
   - {fileID: 1123347236}
   curIndex: 0
+  animatorGroundedGraceAfterJump: 0.12
   playerModels:
   - {fileID: 1622556224}
   - {fileID: 865971325}
@@ -1444,7 +1445,7 @@ Transform:
   m_GameObject: {fileID: 631538646}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 220.68, y: -6.4, z: 0.1633831}
+  m_LocalPosition: {x: 218.69, y: -6.4, z: 0.1633831}
   m_LocalScale: {x: 26.511396, y: 20.85454, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1574,7 +1575,7 @@ Transform:
   m_GameObject: {fileID: 672780842}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 163.92, y: -6.4, z: 0.1633831}
+  m_LocalPosition: {x: 162.04, y: -6.4, z: 0.1633831}
   m_LocalScale: {x: 26.511396, y: 20.85454, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2508,6 +2509,7 @@ MonoBehaviour:
   mulPlayerController: {fileID: 563763684}
   animator: {fileID: 865971326}
   paramIsWalking: isWalking
+  paramIsRunning: isRunning
   paramSpeedX: speedX
   paramSpeedY: speedY
   paramIsGrounded: isGrounded
@@ -2783,7 +2785,7 @@ Transform:
   m_GameObject: {fileID: 1099459285}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 235.33, y: -6.8, z: 0.1633831}
+  m_LocalPosition: {x: 232.93001, y: -6.8, z: 0.1633831}
   m_LocalScale: {x: 17.066668, y: 20.854542, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -3402,7 +3404,7 @@ Transform:
   m_GameObject: {fileID: 1126235500}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 280.56, y: -1.7, z: 0}
+  m_LocalPosition: {x: 278.16, y: -1.7, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -4180,7 +4182,7 @@ Transform:
   m_GameObject: {fileID: 1349924293}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 191.56, y: -6.4, z: 0.1633831}
+  m_LocalPosition: {x: 190.33, y: -6.4, z: 0.1633831}
   m_LocalScale: {x: 26.511396, y: 20.85454, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -4310,7 +4312,7 @@ Transform:
   m_GameObject: {fileID: 1383833821}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 206.23, y: -6.4, z: 0.1633831}
+  m_LocalPosition: {x: 204.19, y: -6.4, z: 0.1633831}
   m_LocalScale: {x: 26.511396, y: 20.85454, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -4831,6 +4833,7 @@ MonoBehaviour:
   mulPlayerController: {fileID: 563763684}
   animator: {fileID: 1622556225}
   paramIsWalking: isWalking
+  paramIsRunning: isRunning
   paramSpeedX: speedX
   paramSpeedY: speedY
   paramIsGrounded: isGrounded
@@ -5375,7 +5378,7 @@ Transform:
   m_GameObject: {fileID: 1995297520}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 178.16, y: -6.4, z: 0.1633831}
+  m_LocalPosition: {x: 176.01, y: -6.4, z: 0.1633831}
   m_LocalScale: {x: 26.511396, y: 20.85454, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
