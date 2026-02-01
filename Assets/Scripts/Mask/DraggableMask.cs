@@ -27,9 +27,27 @@ public class DraggableMask : MonoBehaviour
     [SerializeField]
     private Vector2 target;
 
+    [Header("按 R 召唤到鼠标")]
+    [Tooltip("召唤动画总时长（秒），用曲线缓入缓出")]
+    [SerializeField] private float summonDuration = 0.4f;
+    [Tooltip("自定义曲线：横轴 0~1 为进度，纵轴为插值系数；不填则用 SmoothStep 缓入缓出")]
+    [SerializeField] private AnimationCurve summonCurve;
+    private bool _summoningToMouse;
+    private Vector2 _summonStartPos;
+    private Vector2 _summonTarget;
+    private float _summonProgress;
+
     public bool isInsideGround = false;
 
     public Vector3 initWorldPos;
+
+    [Header("滚轮缩放")]
+    [Tooltip("最小缩放（统一 scale）")]
+    [SerializeField] private float minScale = 0.3f;
+    [Tooltip("最大缩放")]
+    [SerializeField] private float maxScale = 3f;
+    [Tooltip("滚轮每格改变的缩放量")]
+    [SerializeField] private float scrollScaleSpeed = 0.15f;
 
     void Awake()
     {
@@ -89,9 +107,49 @@ public class DraggableMask : MonoBehaviour
             OnMouseUpD();
             draggableDragging=false;
         }
+
+        // 滚轮缩放：在 minScale ~ maxScale 之间
+        float scroll = Input.GetAxis("Mouse ScrollWheel");
+        if (scroll != 0f)
+        {
+            float s = transform.localScale.x;
+            s += scroll * scrollScaleSpeed;
+            s = Mathf.Clamp(s, minScale, maxScale);
+            transform.localScale = new Vector3(s, s, transform.localScale.z);
+        }
+
+        // 按 R 键用曲线平滑召唤 mask 到鼠标位置
+        if (Input.GetKeyDown(KeyCode.R) && cam != null)
+        {
+            Vector3 pos = cam.ScreenToWorldPoint(Input.mousePosition);
+            pos.z = 0f;
+            _summonStartPos = _rb.position;
+            _summonTarget = new Vector2(pos.x, pos.y);
+            _summonProgress = 0f;
+            _summoningToMouse = true;
+        }
     }
     void FixedUpdate()
     {
+        // 按 R 召唤：用曲线插值（缓入缓出）到鼠标位置
+        if (_summoningToMouse)
+        {
+            float dur = Mathf.Max(0.001f, summonDuration);
+            _summonProgress += Time.fixedDeltaTime / dur;
+            float t = Mathf.Clamp01(_summonProgress);
+            float curveT = summonCurve != null && summonCurve.keys.Length > 0
+                ? summonCurve.Evaluate(t)
+                : Mathf.SmoothStep(0f, 1f, t);
+            Vector2 next = Vector2.Lerp(_summonStartPos, _summonTarget, curveT);
+            _rb.MovePosition(next);
+            if (_summonProgress >= 1f)
+            {
+                _rb.MovePosition(_summonTarget);
+                _summoningToMouse = false;
+            }
+            return;
+        }
+
         if (_isDragging)
         {
             if (isInsideGround)
@@ -116,6 +174,12 @@ public class DraggableMask : MonoBehaviour
     public void RespawnToInitPos()
     {
         _rb.MovePosition(initWorldPos);
+    }
+
+    /// <summary> 将 mask 设到指定世界坐标（存档点复活时与玩家一致用）。 </summary>
+    public void SetPosition(Vector2 worldPos)
+    {
+        _rb.position = worldPos;
     }
 }
 

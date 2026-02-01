@@ -73,6 +73,8 @@ namespace Yzz
         [Header("MaskObject")]
         [Tooltip("The Mask Object to detect")]
         [SerializeField] private DraggableMask mask;
+        [Tooltip("存档点管理器，不填则用场景里的 CheckpointManager.Instance")]
+        [SerializeField] private CheckpointManager checkpointManager;
 
         [Header("Ground Colliders (按 curIndex 控制 isTrigger)")]
         [Tooltip("Layer 为 Ground 的物体上的 Collider2D 列表；curIndex=0 时为非 Trigger，curIndex=1 时为 Trigger")]
@@ -393,18 +395,37 @@ namespace Yzz
                     ChangeCur(0);
                 }
             }
-            // 跌落重生：低于阈值则传回初始位置并重置速度/计时
+            // 跌落重生：有存档点则复活到存档点且 mask 跟玩家一致，否则用初始出生点
             if (players[curIndex].transform.position.y < respawnY)
             {
                 _rbs[curIndex].velocity = Vector2.zero;
-                if (isAllSamePos)
-                    players[curIndex].transform.position = _spawnPosition;
+                Vector2 respawnPos;
+                var cm = checkpointManager != null ? checkpointManager : CheckpointManager.Instance;
+                if (cm != null && cm.HasCheckpoint())
+                {
+                    respawnPos = (Vector2)cm.GetCheckpointPosition();
+                    if (isAllSamePos)
+                        players[curIndex].transform.position = respawnPos;
+                    else
+                    {
+                        var dd = _offsets[curIndex] - _offsets[0];
+                        players[curIndex].transform.position = respawnPos + (Vector2)dd;
+                    }
+                    if (mask != null)
+                        mask.SetPosition(respawnPos + new Vector2(0, 7f));
+                }
                 else
                 {
-                    var dd = _offsets[curIndex] - _offsets[0];
-                    players[curIndex].transform.position = _spawnPosition + (Vector2)dd;
+                    if (isAllSamePos)
+                        players[curIndex].transform.position = _spawnPosition;
+                    else
+                    {
+                        var dd = _offsets[curIndex] - _offsets[0];
+                        players[curIndex].transform.position = _spawnPosition + (Vector2)dd;
+                    }
+                    if (mask != null)
+                        mask.RespawnToInitPos();
                 }
-                mask.RespawnToInitPos();
                 _coyoteCounter = coyoteTime;
                 _jumpBufferCounter = 0f;
                 _hasJumpedSinceGrounded = false;
@@ -425,7 +446,7 @@ namespace Yzz
             //     if (_inputX > 0f && wallRight) targetVelX = 0f;
             //     if (_inputX < 0f && wallLeft) targetVelX = 0f;
             // }
-            
+
 
             float baseAccel = grounded ? groundAcceleration : (groundAcceleration * airControlFactor);
             float accel = baseAccel * (_isSprinting ? sprintAccelerationMultiplier : 1f);
@@ -443,9 +464,9 @@ namespace Yzz
             }
             if (wallStuck)
             {
-                
-                _coyoteCounter = coyoteTime*2f;
-                
+
+                _coyoteCounter = coyoteTime * 2f;
+
             }
             // Jump: 每次着地只执行一次，避免重叠/误判时每帧加力
             bool canJump = (!_hasJumpedSinceGrounded || wallStuckOne) && (_coyoteCounter > 0f || grounded || wallStuck);
@@ -454,7 +475,7 @@ namespace Yzz
                 _rbs[curIndex].velocity = new Vector2(_rbs[curIndex].velocity.x, jumpForce);
                 if (wallStuck)
                 {
-                    _rbs[curIndex].velocity += new Vector2(-Mathf.Sign(_inputX) * 0.1f,0);
+                    _rbs[curIndex].velocity += new Vector2(-Mathf.Sign(_inputX) * 0.1f, 0);
                 }
                 _jumpBufferCounter = 0f;
                 _coyoteCounter = 0f;
@@ -507,14 +528,18 @@ namespace Yzz
                 Vector2 downR = new Vector2(Mathf.Sin(rad), -Mathf.Cos(rad));
                 RaycastHit2D hitL = Physics2D.Raycast(baseOrigin, downL, groundCheckDistance, layers);
                 RaycastHit2D hitR = Physics2D.Raycast(baseOrigin, downR, groundCheckDistance, layers);
-                if (hitL && hitL.collider != _cols[curIndex] && hitL.normal.y >= minGroundNormalYCorner){ 
+                if (hitL && hitL.collider != _cols[curIndex] && hitL.normal.y >= minGroundNormalYCorner)
+                {
                     // print($"{hitL.normal} {hitL.collider.name}");
-                    return true; 
-                    };
-                if (hitR && hitR.collider != _cols[curIndex] && hitR.normal.y >= minGroundNormalYCorner){ 
+                    return true;
+                }
+                ;
+                if (hitR && hitR.collider != _cols[curIndex] && hitR.normal.y >= minGroundNormalYCorner)
+                {
                     // print($"{hitR.normal} {hitR.collider.name}");
-                    return true; 
-                    };
+                    return true;
+                }
+                ;
             }
             return false;
         }
@@ -612,7 +637,7 @@ namespace Yzz
                 inside = col != null;
                 colInfo = col != null ? $"{col.name}(layer={LayerMask.LayerToName(col.gameObject.layer)})" : "null";
                 // if (Time.frameCount % 20 == 0)
-                    // Debug.Log($"[isInside] curIndex=0 → 用 Ground2 层 | worldPoint={worldPoint} | OverlapPoint 命中={col != null} | col={colInfo} → inside={inside}");
+                // Debug.Log($"[isInside] curIndex=0 → 用 Ground2 层 | worldPoint={worldPoint} | OverlapPoint 命中={col != null} | col={colInfo} → inside={inside}");
             }
             // else if (Time.frameCount % 20 == 0)
             // {
