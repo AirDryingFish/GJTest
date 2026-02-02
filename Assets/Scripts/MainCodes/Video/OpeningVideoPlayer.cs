@@ -35,6 +35,15 @@ namespace Yzz
         [SerializeField] private AudioClip bgmClip;
 
         /// <summary>
+        /// 仅播放主界面 BGM（不播开场视频）。从关卡返回 BeginScene 时调用。
+        /// </summary>
+        public void PlayBGMOnly()
+        {
+            if (bgmClip != null && MusicManager.Instance != null)
+                MusicManager.Instance.PlayBGM(bgmClip);
+        }
+
+        /// <summary>
         /// 按顺序播完两组（各指定秒数）后调用 onComplete。
         /// </summary>
         public void PlaySequence(Action onComplete)

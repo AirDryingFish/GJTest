@@ -17,6 +17,11 @@ namespace Yzz
         /// </summary>
         public static bool ShowLevelSelectOnLoad;
 
+        /// <summary>
+        /// 本局是否已播过开场视频（从关卡返回不播，首次进 BeginScene 只播一次）。
+        /// </summary>
+        private static bool _hasPlayedOpening;
+
         public Button buttonBack;
 
         [SerializeField] private Button button;
@@ -39,14 +44,20 @@ namespace Yzz
 
         private void Awake()
         {
-            openingVideoPlayer.PlaySequence(null);
-
             if (button != null)
                 button.onClick.AddListener(OnStartButtonClick);
             if (ShowLevelSelectOnLoad)
             {
                 ShowLevelSelectOnLoad = false;
                 ShowLevelSelect();
+                if (openingVideoPlayer != null)
+                    openingVideoPlayer.PlayBGMOnly();
+            }
+            else if (!_hasPlayedOpening && openingVideoPlayer != null)
+            {
+                // 首次进入 BeginScene（非从关卡返回）：播一次开场
+                _hasPlayedOpening = true;
+                openingVideoPlayer.PlaySequence(null);
             }
             if (buttonBack != null)
                 buttonBack.onClick.AddListener(Toggle);
@@ -97,10 +108,13 @@ namespace Yzz
             if (canvasToHide != null)
                 canvasToHide.gameObject.SetActive(false);
 
-            // if (openingVideoPlayer != null)
-            //     openingVideoPlayer.PlaySequence(ShowLevelSelect);
-            // else
-            ShowLevelSelect();
+            if (openingVideoPlayer != null && !_hasPlayedOpening)
+            {
+                _hasPlayedOpening = true;
+                openingVideoPlayer.PlaySequence(ShowLevelSelect);
+            }
+            else
+                ShowLevelSelect();
         }
 
         /// <summary>

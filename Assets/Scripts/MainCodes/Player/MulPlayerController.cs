@@ -13,6 +13,9 @@ namespace Yzz
     [RequireComponent(typeof(Collider2D))]
     public class MulPlayerController : MonoBehaviour
     {
+        [Header("Input")]
+        [Tooltip("Optional: assign a component that implements IPlayerInput. If empty, will auto-find or add KeyboardPlayerInput.")]
+        [SerializeField] private MonoBehaviour inputProvider;
         [Header("Movement")]
         [SerializeField] private float moveSpeed = 8f;
         [Tooltip("地面加减速，越大越跟手；约 400 可在一帧内到满速/刹停")]
@@ -91,6 +94,7 @@ namespace Yzz
 
         // private Rigidbody2D _rb;
         // private Collider2D _col;
+        private IPlayerInput _input;
         private Rigidbody2D[] _rbs;
         private Collider2D[] _cols;
 
@@ -133,6 +137,9 @@ namespace Yzz
 
 
         public AudioSource jumpSound, warpSound;
+        [Header("Warp Sound")]
+        [SerializeField] private float warpSoundCooldown = 1.0f;
+        private float _warpSoundCooldownRemaining;
 
         private void InitPlayers()
         {
@@ -249,6 +256,9 @@ namespace Yzz
         private void Awake()
         {
             InitPlayers();
+            _input = ResolveInput();
+            if (_input == null)
+                _input = gameObject.AddComponent<KeyboardPlayerInput>();
 
             // 保存初始出生点，跌落重生时回到此位置
             _spawnPosition = players[curIndex].transform.position;
@@ -280,13 +290,13 @@ namespace Yzz
             if (_animatorGroundedGraceRemaining > 0f)
                 _animatorGroundedGraceRemaining -= Time.deltaTime;
 
-            _inputX = Input.GetAxisRaw("Horizontal");
+            _inputX = _input != null ? _input.MoveX : 0f;
 
             // Sprint: 按住 Shift 加速
-            _isSprinting = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
+            _isSprinting = _input != null && _input.SprintHeld;
 
             // Jump buffer: remember jump input for a short time
-            if (Input.GetKeyDown(KeyCode.Space))
+            if (_input != null && _input.JumpPressed)
                 _jumpBufferCounter = jumpBufferTime;
             else if (_jumpBufferCounter > 0f)
                 _jumpBufferCounter -= Time.deltaTime;
@@ -330,6 +340,9 @@ namespace Yzz
 
         private void FixedUpdate()
         {
+            if (_warpSoundCooldownRemaining > 0f)
+                _warpSoundCooldownRemaining -= Time.fixedDeltaTime;
+
             var rb = _rbs[curIndex];
             float posX = rb.position.x;
             int inputSign = Mathf.Abs(_inputX) > 0.1f ? (int)Mathf.Sign(_inputX) : 0;
@@ -382,7 +395,7 @@ namespace Yzz
             {
                 if (curIndex != 1)
                 {
-                    warpSound.Play();
+                    TryPlayWarpSound();
                     ChangeCur(1);
                 }
 
@@ -391,7 +404,7 @@ namespace Yzz
             {
                 if (curIndex != 0)
                 {
-                    warpSound.Play();
+                    TryPlayWarpSound();
                     ChangeCur(0);
                 }
             }
@@ -492,12 +505,25 @@ namespace Yzz
             // Variable jump height & fall gravity
             if (_rbs[curIndex].velocity.y < 0f)
                 _rbs[curIndex].gravityScale = gravityScale * fallGravityMultiplier;
-            else if (_rbs[curIndex].velocity.y > 0f && !Input.GetKey(KeyCode.Space))
+            else if (_rbs[curIndex].velocity.y > 0f && !(_input != null && _input.JumpHeld))
                 _rbs[curIndex].gravityScale = gravityScale * lowJumpMultiplier;
             else
                 _rbs[curIndex].gravityScale = gravityScale;
 
 
+        }
+
+        private IPlayerInput ResolveInput()
+        {
+            if (inputProvider != null)
+                return inputProvider as IPlayerInput;
+            var monos = GetComponents<MonoBehaviour>();
+            for (int i = 0; i < monos.Length; i++)
+            {
+                if (monos[i] is IPlayerInput pi)
+                    return pi;
+            }
+            return null;
         }
 
         private bool IsGrounded()
@@ -542,6 +568,14 @@ namespace Yzz
                 ;
             }
             return false;
+        }
+
+        private void TryPlayWarpSound()
+        {
+            if (warpSound == null || _warpSoundCooldownRemaining > 0f)
+                return;
+            warpSound.Play();
+            _warpSoundCooldownRemaining = warpSoundCooldown;
         }
 
         /// <summary> 检测左侧(-1)或右侧(1)是否有墙/障碍，用于空中贴墙时不往墙里推。站在尖角/下尖角时不算墙，避免卡住。 </summary>
