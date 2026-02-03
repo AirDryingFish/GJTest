@@ -49,7 +49,7 @@ public class VideoCompatibleOnBuilding : IPreprocessBuildWithReport, IPostproces
     public void OnPostprocessBuild(BuildReport report)
     {
         string tmpRoot = Path.Combine(TEMP_ROOT, VideoPlayerWebCompatible.VIDEO_PATH);
-        string saRoot = Path.Combine(report.summary.outputPath, VideoPlayerWebCompatible.VIDEO_PATH);
+        string saRoot = Path.Combine(report.summary.outputPath, "StreamingAssets", VideoPlayerWebCompatible.VIDEO_PATH);
         FileUtil.CopyFileOrDirectory(tmpRoot, saRoot);
     }
 }
