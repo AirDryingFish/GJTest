@@ -17,6 +17,9 @@ namespace Yzz
         /// </summary>
         public static bool ShowLevelSelectOnLoad;
 
+        // When returning from FinalScene, reset opening so BeginScene behaves like first launch.
+        public static bool ResetOpeningOnLoad;
+
         /// <summary>
         /// 本局是否已播过开场视频（从关卡返回不播，首次进 BeginScene 只播一次）。
         /// </summary>
@@ -46,6 +49,11 @@ namespace Yzz
         {
             if (button != null)
                 button.onClick.AddListener(OnStartButtonClick);
+            if (ResetOpeningOnLoad)
+            {
+                ResetOpeningOnLoad = false;
+                _hasPlayedOpening = false;
+            }
             if (ShowLevelSelectOnLoad)
             {
                 ShowLevelSelectOnLoad = false;

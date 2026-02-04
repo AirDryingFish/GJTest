@@ -113,7 +113,10 @@ namespace Yzz
             if (MusicManager.Instance != null)
                 MusicManager.Instance.StopBGM();
             if (!string.IsNullOrEmpty(beginSceneName))
+            {
+                InitSceneLoader.ResetOpeningOnLoad = true;
                 SceneManager.LoadScene(beginSceneName);
+            }
         }
 
         /// <summary> 渐变到目标透明度；支持 CanvasGroup 或 Graphic(Image/RawImage)。 </summary>
