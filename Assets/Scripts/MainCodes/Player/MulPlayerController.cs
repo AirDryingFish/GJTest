@@ -535,6 +535,17 @@ namespace Yzz
             float extX = _cols[curIndex] != null ? _cols[curIndex].bounds.extents.x * groundCheckWidthFactor : 0f;
             // 左、中、右三条竖直射线，站在尖角/窄台上时至少一条能命中“朝上”的地面
             Vector2[] offsets = { new Vector2(-extX, 0f), Vector2.zero, new Vector2(extX, 0f) };
+            // 当在框内时，maskEdgeCollider 只有边界、框内部脚下无几何；用“脚底在对应层或 mask 填充区内”视为接地（与 inside 判定一致）
+            if (_isInside)
+            {
+                LayerMask insideLayer = curIndex == 0 ? LayerMask.GetMask("Ground2") : LayerMask.GetMask("Ground");
+                for (int i = 0; i < offsets.Length; i++)
+                {
+                    Vector2 p = baseOrigin + offsets[i];
+                    if (Physics2D.OverlapPoint(p, insideLayer) != null) return true;
+                    if (mask != null && mask.isInMask(p)) return true;
+                }
+            }
             for (int i = 0; i < offsets.Length; i++)
             {
                 Vector2 origin = baseOrigin + offsets[i];
